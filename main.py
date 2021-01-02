@@ -3,6 +3,7 @@ import os
 import shutil
 import json
 import zipfile
+import subprocess
 from contextlib import contextmanager, redirect_stdout
 from io import StringIO
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -391,7 +392,7 @@ class Ui_MainWindow(object):
         item.setText("Grade")
         self.list1.clear()
         self.checked = []
-        subprocess.run([sys.executable, Path(self.main_dir, "configGen.py")]) # resets the default directories
+        self.config_initialize()
         
         # Read in config settings from config.json
         with open(Path(self.main_dir, 'config.json'), 'r') as f:
@@ -405,8 +406,13 @@ class Ui_MainWindow(object):
         self.label1.setText(self.button1_dir)
         self.label2.setText(self.button2_dir)
     
+    def config_initialize(self):
+        config = {"default_dir1": os.path.normpath(os.path.expanduser("~/Desktop")), "default_dir2": os.path.normpath(os.path.expanduser("~/Desktop"))}
+        with open(self.main_dir + '\\config.json', 'w') as f:
+            json.dump(config, f)
+    
     def doc_handler(self):
-        doc = "{0}\\PyAutoMark_Documentation.pdf".format(self.main_dir)
+        doc = Path(self.main_dir, "PyAutoMark_Documentation.pdf")
         subprocess.Popen([doc],shell=True) # use Popen instead of run, as run requires the pdf to close to continue working in PyAutoMark.
         
     def question(self, Q_num, file, inp, outp, outfile, weight):
