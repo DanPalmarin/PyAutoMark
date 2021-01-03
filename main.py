@@ -148,11 +148,16 @@ class Ui_MainWindow(object):
         self.label3.setGeometry(QtCore.QRect(110, 30, 321, 21))
         self.label3.setObjectName("label3")
         MainWindow.setCentralWidget(self.centralwidget)
+        
+        ### Tools and Help ###
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 479, 21))
         self.menubar.setObjectName("menubar")
+        self.menuTools = QtWidgets.QMenu(self.menubar)
+        self.menuTools.setObjectName("menuTools")
         self.menuHelp = QtWidgets.QMenu(self.menubar)
         self.menuHelp.setObjectName("menuHelp")
+        
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
@@ -161,14 +166,14 @@ class Ui_MainWindow(object):
         # Clear results tab
         self.actionClear = QtWidgets.QAction(MainWindow)
         self.actionClear.setObjectName("actionClear")
-        self.menuHelp.addAction(self.actionClear)
-        self.menubar.addAction(self.menuHelp.menuAction())
+        self.menuTools.addAction(self.actionClear)
+        self.menubar.addAction(self.menuTools.menuAction())
         
         # Reset all tab
         self.actionReset = QtWidgets.QAction(MainWindow)
         self.actionReset.setObjectName("actionReset")
-        self.menuHelp.addAction(self.actionReset)
-        self.menubar.addAction(self.menuHelp.menuAction())
+        self.menuTools.addAction(self.actionReset)
+        self.menubar.addAction(self.menuTools.menuAction())
         
         # Documentation tab
         self.actionDocumentation_PDF = QtWidgets.QAction(MainWindow)
@@ -187,10 +192,10 @@ class Ui_MainWindow(object):
         self.groupBox1.setTitle(_translate("MainWindow", "File selection"))
         self.button1.setStatusTip(_translate("MainWindow", "Select the desired assignment key .py file."))
         self.button1.setText(_translate("MainWindow", "Assignment key"))
-        self.label1.setText(_translate("MainWindow", self.button1_dir))
+        self.label1.setText(_translate("MainWindow", ''))
         self.button2.setStatusTip(_translate("MainWindow", "Select the .zip assignment(s) that require marking."))
-        self.button2.setText(_translate("MainWindow", "Read .zip file(s)"))
-        self.label2.setText(_translate("MainWindow", self.button2_dir))
+        self.button2.setText(_translate("MainWindow", "Assignments"))
+        self.label2.setText(_translate("MainWindow", ''))
         self.groupBox2.setTitle(_translate("MainWindow", "Program execution and results"))
         self.table1.setSortingEnabled(True)
         # item = self.table1.verticalHeaderItem(0)
@@ -232,10 +237,12 @@ class Ui_MainWindow(object):
         
         self.button3.setText(_translate("MainWindow", "Run program"))
         self.label3.setText(_translate("MainWindow", ""))
-        self.menuHelp.setTitle(_translate("MainWindow", "Tools"))
+        self.menuTools.setTitle(_translate("MainWindow", "Tools"))
         self.actionClear.setText(_translate("MainWindow", "Clear results"))
         self.actionReset.setText(_translate("MainWindow", "Reset all"))
+        self.menuHelp.setTitle(_translate("MainWindow", "Help"))
         self.actionDocumentation_PDF.setText(_translate("MainWindow", "Documentation (PDF)"))
+        
         self.button3.setEnabled(False)
         self.button4.setEnabled(False)
         self.label1.setWordWrap(True)
@@ -245,9 +252,10 @@ class Ui_MainWindow(object):
         filename = QFileDialog.getOpenFileName(None, "Select a solution key (.py).", self.button1_dir, "Python file (*.py)")
         self.button1_file = filename[0]
         self.button1_dir = os.path.dirname(self.button1_file)
-        
+        self.button1_basename = os.path.basename(self.button1_file)
+
         if self.button1_file != "":
-            self.label1.setText(self.button1_file)
+            self.label1.setText(self.button1_basename)
             
             file_extension = os.path.splitext(self.button1_file)[1]
             if file_extension == '.py':
@@ -267,7 +275,7 @@ class Ui_MainWindow(object):
             self.button3.setEnabled(False)
             
     def button2_handler(self):
-        filename = QFileDialog.getOpenFileNames(None, "Select any number of student submissions (.zip).", self.button2_dir, "Zip file(s) (*.zip)")
+        filename = QFileDialog.getOpenFileNames(None, "Select any number of student assignments (.zip).", self.button2_dir, "Zip file(s) (*.zip)")
         self.button2_list = filename[0]
         
         if self.button2_list != []:
@@ -286,10 +294,7 @@ class Ui_MainWindow(object):
                     json.dump(self.config, f)
                 
                 # update label
-                if len(self.button2_list) == 1:
-                    self.label2.setText(self.button2_list[0])
-                else:
-                    self.label2.setText("{0} zip files selected".format(len(self.button2_list)))
+                self.label2.setText("{0} zip file(s) selected".format(len(self.button2_list)))
         
         if self.button1_bool == True and self.button2_bool == True:
             self.button3.setEnabled(True)
@@ -403,9 +408,13 @@ class Ui_MainWindow(object):
         self.button2_dir = self.config['default_dir2']
         
         # Reset labels
-        self.label1.setText(self.button1_dir)
-        self.label2.setText(self.button2_dir)
-    
+        self.label1.setText('')
+        self.label2.setText('')
+        
+        # Disable the bottom two buttons
+        self.button3.setEnabled(False)
+        self.button4.setEnabled(False)
+        
     def config_initialize(self):
         config = {"default_dir1": os.path.normpath(os.path.expanduser("~/Desktop")), "default_dir2": os.path.normpath(os.path.expanduser("~/Desktop"))}
         with open(self.main_dir + '\\config.json', 'w') as f:
