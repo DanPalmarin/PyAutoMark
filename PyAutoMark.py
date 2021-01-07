@@ -437,7 +437,7 @@ class Ui_MainWindow(object):
         self.button4.setEnabled(False)
         
     def config_initialize(self):
-        config = {"default_dir1": os.path.normpath(os.path.expanduser("~/Desktop")), "default_dir2": os.path.normpath(os.path.expanduser("~/Desktop"))}
+        config = {"default_dir1": self.main_dir, "default_dir2": self.main_dir} # This resets the default path to the program location
         with open(self.main_dir + '\\config.json', 'w') as f:
             json.dump(config, f)
     
