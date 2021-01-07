@@ -364,7 +364,7 @@ class Ui_MainWindow(object):
                     unmarked_questions = sorted(list(set(question_numbers) - set(marked_questions)))
                     with open(self.output_file, 'a') as f:
                         output_arg = str(unmarked_questions)[1:-1]
-                        f.write("The following questions were not found: {0}.".format(output_arg))
+                        f.write("{0}The following questions were not found: {1}.".format(chr(0x002A), output_arg))
                         NHI = True
                 
                 # Update table heading 'Grade' with the assignment total
@@ -431,6 +431,8 @@ class Ui_MainWindow(object):
         self.label2.setText('')
         
         # Disable the bottom two buttons
+        self.button1_bool = False
+        self.button2_bool = False
         self.button3.setEnabled(False)
         self.button4.setEnabled(False)
         
