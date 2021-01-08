@@ -44,8 +44,7 @@ Unicode True
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
 OutFile "PyAutoMark_Installer.exe"
-RequestExecutionLevel admin # added after using HM NIS Edit
-InstallDir "$PROGRAMFILES\PyAutoMark"
+InstallDir "$LocalAppData\PyAutoMark"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
 ShowUnInstDetails show
