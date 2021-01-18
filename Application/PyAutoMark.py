@@ -451,14 +451,21 @@ class Ui_MainWindow(object):
         head, tail = os.path.split(file.path) #store the sol dir and the sol file in separate local variables
         trim_tail = os.path.splitext(tail)[0]
         sys.path.insert(1, head)
+        
         if inp == []:
+            # Properly format the desired output from the solution key (with newlines)
+            if type(outp[0]) is tuple:
+                formatted_output = self.in_out_with_newlines(outp[0])
+            else:
+                formatted_output = str(outp[0])
+            
             result = self.running_assignments(trim_tail, None)
             
             # Report output or errors.
-            if result != str(outp[0]):
+            if result != str(formatted_output):
                 #print("{0}. Incorrect\n      Desired output: {1} \n      Your output: {2}".format(Q_num, outp[0], result.stdout))
                 with open(outfile, 'a') as f:
-                    f.write("{0}. Incorrect\n     Desired output: {1} \n     Your output: {2}\n\n".format(Q_num, outp[0], result))
+                    f.write("{0}. Incorrect\n     Desired output: {1} \n     Your output: {2}\n\n".format(Q_num, formatted_output, result))
                 return 0
             else:
                 #print("{0}. Correct\n".format(Q_num))
@@ -471,17 +478,24 @@ class Ui_MainWindow(object):
     
             # We check each list of inputs in 'input' and compare them to the corresponding outputs in 'outputs'.
             for i in range(len(inp)):
+                # Properly format the desired output from the solution key (with newlines)
+                if type(outp[i]) is tuple:
+                    formatted_output = self.in_out_with_newlines(outp[i])
+                else:
+                    formatted_output = str(outp[i])
+                
+                # Properly format the input with newlines
                 if type(inp[i]) is tuple:
-                    formatted_input = self.input_with_newlines(inp[i])
+                    formatted_input = self.in_out_with_newlines(inp[i])
                     result = self.running_assignments(trim_tail, formatted_input)
                 else:
                     result = self.running_assignments(trim_tail, str(inp[i]))
 
                 # Report output or errors.
-                if result != str(outp[i]):
+                if result != formatted_output:
                     success = False
                     console_output.append("    -Test {0}: failure\n".format(i+1))
-                    console_output.append("       Input: {0}\n       Desired output: {1}\n       Your output: {2}\n\n".format(inp[i], str(outp[i]).replace("\n", " "), str(result).replace("\n", " ")))
+                    console_output.append("       Input: {0}\n       Desired output: {1}\n       Your output: {2}\n\n".format(inp[i], formatted_output.replace("\n", " "), str(result).replace("\n", " ")))
                 else:
                     if i == len(inp)-1:
                         console_output.append("    -Test {0}: success\n\n".format(i+1))
@@ -527,14 +541,14 @@ class Ui_MainWindow(object):
                         res = "Error: {0}".format(err)
         return res
     
-    def input_with_newlines(self, some_list):
-        new_list = ""
-        for x in some_list:
+    def in_out_with_newlines(self, some_tuple):
+        new_string = ""
+        for x in some_tuple:
             temp_entry = "{0}\n".format(x)
-            new_list += temp_entry
+            new_string += temp_entry
     
-        new_list = new_list.rstrip()
-        return new_list
+        new_string = new_string.rstrip()
+        return new_string
     
     @contextmanager
     def replace_stdin(self, target):
