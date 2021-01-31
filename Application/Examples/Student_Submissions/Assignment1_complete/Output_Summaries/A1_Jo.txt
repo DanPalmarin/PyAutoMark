@@ -1,8 +1,6 @@
 Assignment 1
 
-1. Incorrect
-     Desired output: Hello 
-     Your output: Hello World
+1. Correct
 
 2. Correct
 
@@ -44,6 +42,6 @@ Assignment 1
 10. Incorrect
     -Test 1: failure
        Input: (1, 4, 2)
-       Desired output: -0.59 -3.41
-       Your output: -0.5857864376269049 -3.414213562373095
+       Desired output: -0.59\n-3.41
+       Your output: -0.5857864376269049\n-3.414213562373095
 

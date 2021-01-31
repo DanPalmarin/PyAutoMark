@@ -350,12 +350,12 @@ class Ui_MainWindow(object):
                                 inputs = list(solMod.Q_all[i-1].keys())
                                 outputs = list(solMod.Q_all[i-1].values())
                                 #call method
-                                mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight) 
+                                mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible) 
                             else:
                                 inputs = []
                                 outputs = [solMod.Q_all[i-1]]
                                 #call method
-                                mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight)
+                                mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible)
                             break
                             
                     self.grade += mark
@@ -446,12 +446,14 @@ class Ui_MainWindow(object):
         os.startfile(doc)
         #subprocess.Popen([doc],shell=True) # use Popen instead of run, as run requires the pdf to close to continue working in PyAutoMark.
         
-    def question(self, Q_num, file, inp, outp, outfile, weight):
+    def question(self, Q_num, file, inp, outp, outfile, weight, flexible):
         # Note: The outfile is opened in append mode; all console output is also written outfile.
         head, tail = os.path.split(file.path) #store the sol dir and the sol file in separate local variables
         trim_tail = os.path.splitext(tail)[0]
         sys.path.insert(1, head)
         
+        # This is broken into two main types of solutions: (1) No user input is expected; (2) User input is expected.
+        # Recall: 'inp' contains the user input from the solution key.
         if inp == []:
             # Properly format the desired output from the solution key (with newlines)
             if type(outp[0]) is tuple:
@@ -459,19 +461,51 @@ class Ui_MainWindow(object):
             else:
                 formatted_output = str(outp[0])
             
+            # Capture the result of the submission
             result = self.running_assignments(trim_tail, None)
             
+            # For printing out to text files
+            print_out = formatted_output.replace("\n", "\\n")
+            print_res = str(result).replace("\n", "\\n")
+            
             # Report output or errors.
-            if result != str(formatted_output):
-                #print("{0}. Incorrect\n      Desired output: {1} \n      Your output: {2}".format(Q_num, outp[0], result.stdout))
-                with open(outfile, 'a') as f:
-                    f.write("{0}. Incorrect\n     Desired output: {1} \n     Your output: {2}\n\n".format(Q_num, formatted_output, result))
-                return 0
-            else:
-                #print("{0}. Correct\n".format(Q_num))
-                with open(outfile, 'a') as f:
-                    f.write("{0}. Correct\n\n".format(Q_num))
-                return weight[Q_num-1]
+            # If Q_num is in solMod.Q_flexible, then we check only for containment
+            if Q_num in flexible:
+                if type(outp[0]) is tuple:
+                    # If the type is a tuple then we check each element of the tuple for containment in result.
+                    containment_check = []
+                    for element in outp[0]:
+                        containment_check.append(str(element) in result)
+                    
+                    if False in containment_check:
+                        with open(outfile, 'a') as f:
+                            f.write("{0}. Incorrect\n     Desired output: {1} \n     Your output: {2}\n\n".format(Q_num, print_out, print_res))
+                        return 0
+                    else:
+                        with open(outfile, 'a') as f:
+                            f.write("{0}. Correct\n\n".format(Q_num))
+                        return weight[Q_num-1]
+                else:
+                    # This is the simple case: no newlines should be presented in desired ouput.
+                    if formatted_output not in result:
+                        with open(outfile, 'a') as f:
+                            f.write("{0}. Incorrect\n     Desired output: {1} \n     Your output: {2}\n\n".format(Q_num, print_out, print_res))
+                        return 0
+                    else:
+                        with open(outfile, 'a') as f:
+                            f.write("{0}. Correct\n\n".format(Q_num))
+                        return weight[Q_num-1]
+            else: 
+                if result != str(formatted_output): # Checks for strict equality
+                    #print("{0}. Incorrect\n      Desired output: {1} \n      Your output: {2}".format(Q_num, outp[0], result.stdout))
+                    with open(outfile, 'a') as f:
+                        f.write("{0}. Incorrect\n     Desired output: {1} \n     Your output: {2}\n\n".format(Q_num, print_out, result))
+                    return 0
+                else:
+                    #print("{0}. Correct\n".format(Q_num))
+                    with open(outfile, 'a') as f:
+                        f.write("{0}. Correct\n\n".format(Q_num))
+                    return weight[Q_num-1]
         else:
             success = True
             console_output = []
@@ -490,17 +524,50 @@ class Ui_MainWindow(object):
                     result = self.running_assignments(trim_tail, formatted_input)
                 else:
                     result = self.running_assignments(trim_tail, str(inp[i]))
-
+                
+                # For printing out to text files
+                print_out = formatted_output.replace("\n", "\\n")
+                print_res = str(result).replace("\n", "\\n")
+            
                 # Report output or errors.
-                if result != formatted_output:
-                    success = False
-                    console_output.append("    -Test {0}: failure\n".format(i+1))
-                    console_output.append("       Input: {0}\n       Desired output: {1}\n       Your output: {2}\n\n".format(inp[i], formatted_output.replace("\n", " "), str(result).replace("\n", " ")))
-                else:
-                    if i == len(inp)-1:
-                        console_output.append("    -Test {0}: success\n\n".format(i+1))
+                # If Q_num is in solMod.Q_flexible, then we check only for containment
+                if Q_num in flexible:
+                    if type(outp[i]) is tuple:
+                        # If the type is a tuple then we check each element of the tuple for containment in result.
+                        containment_check = []
+                        for element in outp[i]:
+                            containment_check.append(str(element) in result)
+                        
+                        if False in containment_check:
+                            success = False
+                            console_output.append("    -Test {0}: failure\n".format(i+1))
+                            console_output.append("       Input: {0}\n       Desired output: {1}\n       Your output: {2}\n\n".format(inp[i], print_out, print_res))
+                        else:
+                            if i == len(inp)-1:
+                                console_output.append("    -Test {0}: success\n\n".format(i+1))
+                            else:
+                                console_output.append("    -Test {0}: success\n".format(i+1))
                     else:
-                        console_output.append("    -Test {0}: success\n".format(i+1))
+                        # This is the simple case: no newlines should be presented in desired ouput.
+                        if formatted_output not in result:
+                            success = False
+                            console_output.append("    -Test {0}: failure\n".format(i+1))
+                            console_output.append("       Input: {0}\n       Desired output: {1}\n       Your output: {2}\n\n".format(inp[i], print_out, print_res))
+                        else:
+                            if i == len(inp)-1:
+                                console_output.append("    -Test {0}: success\n\n".format(i+1))
+                            else:
+                                console_output.append("    -Test {0}: success\n".format(i+1))
+                else:
+                    if result != formatted_output: # Checks for strict equality
+                        success = False
+                        console_output.append("    -Test {0}: failure\n".format(i+1))
+                        console_output.append("       Input: {0}\n       Desired output: {1}\n       Your output: {2}\n\n".format(inp[i], print_out, print_res))
+                    else:
+                        if i == len(inp)-1:
+                            console_output.append("    -Test {0}: success\n\n".format(i+1))
+                        else:
+                            console_output.append("    -Test {0}: success\n".format(i+1))
             
             if success:
                 #print("{0}. Correct".format(Q_num))

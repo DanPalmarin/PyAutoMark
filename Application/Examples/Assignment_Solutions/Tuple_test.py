@@ -3,7 +3,7 @@
 assignment_num = 1
 
 Q1 = "Hello"
-Q2 = "Use the Force"
+Q2 = ("Use", "the", "Force")
 Q3 = {
     (2.5,2.5) : 10.0,
     (1,2) : 7.5
@@ -36,4 +36,5 @@ Q10 = {
 }
 
 Q_weight = [1,1,1,1,1,1,1,1,1,1]
+Q_flexible = [1,2,10]
 Q_all = [Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8,Q9,Q10]
