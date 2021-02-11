@@ -32,6 +32,9 @@ Assignment 1
     -Test 1: success
     -Test 2: success
 
-10. Correct
-    -Test 1: success
+10. Incorrect
+    -Test 1: failure
+       Input: (1, 4, 2)
+       Desired output: -0.59\n-3.41
+       Your output: Root 1 is: -0.59\nRoot 2 is: -3.41
 
