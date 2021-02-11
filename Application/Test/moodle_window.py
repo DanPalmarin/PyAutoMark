@@ -61,8 +61,8 @@ class Ui_MoodleWindow(object):
 "</div>\n"
 "\n"
 ""))
-        self.win2label2.setText(_translate("Window2", "Path to file"))
-        self.win2label3.setText(_translate("Window2", "Path to file"))
+        self.win2label2.setText(_translate("Window2", ""))
+        self.win2label3.setText(_translate("Window2", ""))
 
 
 if __name__ == "__main__":

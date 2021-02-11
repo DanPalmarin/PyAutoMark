@@ -41,6 +41,8 @@ class Main(QMainWindow):
         self.button2_bool = False
         self.checked = [] # this will hold all previously checked zipped file paths
         self.modules = [] # this will hold all previously imported student assignments
+        self.win2button1_dir = self.config['default_dir_win2_1'] # On Moodle window
+        self.win2button2_dir = self.config['default_dir_win2_2'] # On Moodle window
         
         # Define menubar functionality
         self.ui.actionMoodle.triggered.connect(self.moodle_handler)
@@ -238,6 +240,8 @@ class Main(QMainWindow):
         # Define key variables
         self.button1_dir = self.config['default_dir1']
         self.button2_dir = self.config['default_dir2']
+        self.win2button1_dir = self.config['default_dir_win2_1']
+        self.win2button2_dir = self.config['default_dir_win2_2']
         
         # Reset labels
         self.ui.label1.setText('')
@@ -250,7 +254,7 @@ class Main(QMainWindow):
         self.ui.button4.setEnabled(False)
         
     def config_initialize(self):
-        config = {"default_dir1": self.main_dir, "default_dir2": self.main_dir} # This resets the default path to the program location
+        config = {"default_dir1": self.main_dir, "default_dir2": self.main_dir, "default_dir_win2_1": self.main_dir, "default_dir_win2_2": self.main_dir} # This resets the default path to the program location
         with open(Path(self.main_dir, 'config.json'), 'w') as f:
             json.dump(config, f)
     
@@ -442,9 +446,89 @@ class MoodleWindow(QWidget):
         super().__init__()
         self.ui = Ui_MoodleWindow()
         self.ui.setupUi(self)
+        
+        # Set M equal to the Main class for access to its variables
+        self.M = Main()
+        
+        # Define key variables
+        self.win2button1_bool = False
+        self.win2button2_bool = False
+        
+        # Defining button functionality
+        self.ui.win2button1.clicked.connect(self.win2button1_handler)
+        self.ui.win2button2.clicked.connect(self.win2button2_handler)
+        self.ui.win2button2.setEnabled(False)
+        
+    def win2button1_handler(self):
+        self.moodle_zip = QFileDialog.getOpenFileName(None, "Select a single Moodle zip file (.zip).", self.M.win2button1_dir, "Zip file (*.zip)")[0] #returns as tuple: (path, type)
+        self.moodle_zip_file = Path(self.moodle_zip)
+        self.moodle_dir = Path(self.moodle_zip).resolve().parent # directory of the moodle zip
+        self.moodle_name = Path(self.moodle_zip).stem # basename of the moodle zip
+        self.new_moodle_dir = Path(self.moodle_dir, self.moodle_name)
+        print(self.new_moodle_dir)
+        
+        # update the config file if the user selected a zip
+        if self.moodle_zip != "":
+            self.ui.win2label2.setText(self.moodle_name)
+            self.win2button1_bool = True
+            
+            # update the config file
+            self.M.config['default_dir_win2_1'] = str(self.moodle_dir)
+            with open('config.json', 'w') as f:
+                json.dump(self.M.config, f)
+        else:
+            self.win2button1_bool = False
+        
+        # Enable win2button2 or keep it disabled
+        if self.win2button1_bool == True:
+            self.ui.win2button2.setEnabled(True)
+        else:
+            self.ui.win2button2.setEnabled(False)
+    
+    def win2button2_handler(self):
+        # Checks if Student_Submissions folder exists - if not, it creates it in the directory that contains the Moodle zip
+        zipped_submissions = Path(self.moodle_dir, "Student_Submissions")
+        Path(zipped_submissions).mkdir(parents=True, exist_ok=True)
+        
+        # Extract the zipped Moodle file
+        with zipfile.ZipFile(self.moodle_zip_file, 'r') as zip_ref:
+            zip_ref.extractall(self.new_moodle_dir)
+
+        # Iterate over each folder in moodle_dir
+        for entry in os.scandir(self.new_moodle_dir):
+            for A_name_zip in Path(entry).iterdir():
+                shutil.move(A_name_zip, zipped_submissions.joinpath(A_name_zip.name)) # replaces files if they already exist
+
+        # Delete the self.new_moodle_dir and all of its contents
+        if Path(self.new_moodle_dir).is_dir():
+            shutil.rmtree(self.new_moodle_dir)
+        
+        # Disable the process button once it's finished the extraction. This provides feedback to the user.
+        self.ui.win2button2.setEnabled(False)
+
+
+
+
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     w = Main()
     w.show()
     sys.exit(app.exec_())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
