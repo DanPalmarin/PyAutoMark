@@ -2,11 +2,19 @@ Assignment 1
 
 1. Correct
 
-2. Correct
-    -Test 1: success
-    -Test 2: success
+2. Incorrect
+     Desired output: Use the Force 
+     Your output: Error: EOF when reading a line
 
-3. Correct
-    -Test 1: success
-    -Test 2: success
+3. Incorrect
+    -Test 1: failure
+       Input: (2.5, 2.5)
+       Desired output: 10.0
+       Your output: Error: EOF when reading a line
 
+    -Test 2: failure
+       Input: (1, 2)
+       Desired output: 7.5
+       Your output: Error: EOF when reading a line
+
+*The following questions were not found: 4, 5, 6, 7, 8, 9, 10.
