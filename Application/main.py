@@ -17,6 +17,7 @@ from moodle_window import Ui_MoodleWindow
 
 class Main(QMainWindow):
     def __init__(self):
+        # Initialize the main window
         super().__init__()
         
         # Main directory (Pyinstaller friendly code)
