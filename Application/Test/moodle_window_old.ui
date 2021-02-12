@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>320</width>
-    <height>133</height>
+    <width>230</width>
+    <height>144</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,33 +17,66 @@
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>10</y>
+     <y>60</y>
      <width>91</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>Moodle file</string>
+    <string>Moodle .zip file</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="win2button3">
+  <widget class="QPushButton" name="win2button2">
    <property name="geometry">
     <rect>
      <x>20</x>
-     <y>90</y>
+     <y>100</y>
      <width>91</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>Extract and view</string>
+    <string>Process</string>
    </property>
   </widget>
   <widget class="QLabel" name="win2label1">
    <property name="geometry">
     <rect>
-     <x>120</x>
+     <x>20</x>
      <y>10</y>
+     <width>201</width>
+     <height>41</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>&lt;style&gt;
+p
+{
+  margin:0;
+  padding:0;
+  font-size:8pt;
+    line-height:0px;
+}
+div
+{
+  margin:0;
+  padding:0;
+}
+&lt;/style&gt;
+&lt;div&gt;
+  &lt;p&gt;From Moodle:&lt;/p&gt;
+  &lt;p&gt;    - Check &quot;Download submissions in folder&quot;&lt;/p&gt;
+  &lt;p&gt;    - Select &quot;Download selected submissions&quot;&lt;/p&gt;
+&lt;/div&gt;
+
+</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="win2label2">
+   <property name="geometry">
+    <rect>
+     <x>120</x>
+     <y>60</y>
      <width>101</width>
      <height>31</height>
     </rect>
@@ -52,30 +85,17 @@
     <string>Path to file</string>
    </property>
   </widget>
-  <widget class="QLabel" name="win2label2">
+  <widget class="QLabel" name="win2label3">
    <property name="geometry">
     <rect>
      <x>120</x>
-     <y>50</y>
+     <y>100</y>
      <width>101</width>
      <height>31</height>
     </rect>
    </property>
    <property name="text">
-    <string>Path to folder</string>
-   </property>
-  </widget>
-  <widget class="QPushButton" name="win2button2">
-   <property name="geometry">
-    <rect>
-     <x>20</x>
-     <y>50</y>
-     <width>91</width>
-     <height>31</height>
-    </rect>
-   </property>
-   <property name="text">
-    <string>Submission folder</string>
+    <string>Path to file</string>
    </property>
   </widget>
  </widget>

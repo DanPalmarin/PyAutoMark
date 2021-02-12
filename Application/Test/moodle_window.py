@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'moodle.ui'
+# Form implementation generated from reading ui file 'moodle_window.ui'
 #
 # Created by: PyQt5 UI code generator 5.15.2
 #
@@ -14,55 +14,35 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MoodleWindow(object):
     def setupUi(self, Window2):
         Window2.setObjectName("Window2")
-        Window2.resize(230, 144)
-        Window2.setFixedSize(230, 144) # makes it so that you can't resize the window
+        Window2.resize(320, 133)
+        Window2.setFixedSize(320, 133) # makes it so that you can't resize the window
         self.win2button1 = QtWidgets.QPushButton(Window2)
-        self.win2button1.setGeometry(QtCore.QRect(20, 60, 91, 31))
+        self.win2button1.setGeometry(QtCore.QRect(20, 10, 91, 31))
         self.win2button1.setObjectName("win2button1")
-        self.win2button2 = QtWidgets.QPushButton(Window2)
-        self.win2button2.setGeometry(QtCore.QRect(20, 100, 91, 31))
-        self.win2button2.setObjectName("win2button2")
+        self.win2button3 = QtWidgets.QPushButton(Window2)
+        self.win2button3.setGeometry(QtCore.QRect(20, 90, 91, 31))
+        self.win2button3.setObjectName("win2button3")
         self.win2label1 = QtWidgets.QLabel(Window2)
-        self.win2label1.setGeometry(QtCore.QRect(20, 10, 201, 41))
+        self.win2label1.setGeometry(QtCore.QRect(120, 10, 200, 31))
         self.win2label1.setObjectName("win2label1")
         self.win2label2 = QtWidgets.QLabel(Window2)
-        self.win2label2.setGeometry(QtCore.QRect(120, 60, 101, 31))
+        self.win2label2.setGeometry(QtCore.QRect(120, 50, 200, 31))
         self.win2label2.setObjectName("win2label2")
-        self.win2label3 = QtWidgets.QLabel(Window2)
-        self.win2label3.setGeometry(QtCore.QRect(120, 100, 101, 31))
-        self.win2label3.setObjectName("win2label3")
+        self.win2button2 = QtWidgets.QPushButton(Window2)
+        self.win2button2.setGeometry(QtCore.QRect(20, 50, 91, 31))
+        self.win2button2.setObjectName("win2button2")
 
         self.retranslateUi(Window2)
         QtCore.QMetaObject.connectSlotsByName(Window2)
 
     def retranslateUi(self, Window2):
         _translate = QtCore.QCoreApplication.translate
-        Window2.setWindowTitle(_translate("Window2", "Form"))
-        self.win2button1.setText(_translate("Window2", "Moodle .zip file"))
-        self.win2button2.setText(_translate("Window2", "Process"))
-        self.win2label1.setText(_translate("Window2", "<style>\n"
-"p\n"
-"{\n"
-"  margin:0;\n"
-"  padding:0;\n"
-"  font-size:8pt;\n"
-"    line-height:0px;\n"
-"}\n"
-"div\n"
-"{\n"
-"  margin:0;\n"
-"  padding:0;\n"
-"}\n"
-"</style>\n"
-"<div>\n"
-"  <p>From Moodle:</p>\n"
-"  <p>    - Check \"Download submissions in folder\"</p>\n"
-"  <p>    - Select \"Download selected submissions\"</p>\n"
-"</div>\n"
-"\n"
-""))
+        Window2.setWindowTitle(_translate("Window2", "Moodle zip extractor"))
+        self.win2button1.setText(_translate("Window2", "Moodle file"))
+        self.win2button3.setText(_translate("Window2", "Extract and view"))
+        self.win2label1.setText(_translate("Window2", ""))
         self.win2label2.setText(_translate("Window2", ""))
-        self.win2label3.setText(_translate("Window2", ""))
+        self.win2button2.setText(_translate("Window2", "Submission folder"))
 
 
 if __name__ == "__main__":
