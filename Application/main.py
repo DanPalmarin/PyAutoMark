@@ -279,15 +279,16 @@ class Main(QMainWindow):
             print_res = str(result).replace("\n", "\\n")
             
             # Report output or errors.
-            # If Q_num is in solMod.Q_flexible, then we check only for containment
+            # If Q_num is in solMod.Q_flexible, then we check only for containment.
+            # We also lower case both the key and the submission when checking if flexible.
             if Q_num in flexible:
                 if type(outp[0]) is tuple:
                     # If the type is a tuple then we check each element of the tuple for containment in result.
                     containment_check = []
                     for element in outp[0]:
-                        containment_check.append(str(element) in result)
+                        containment_check.append(str(element).lower() in result.lower()) #holds True or False (lower case everything)
                     
-                    if False in containment_check:
+                    if True in containment_check: # only require one True for a success
                         with open(outfile, 'a') as f:
                             f.write("{0}. Incorrect\n     Desired output: {1} \n     Your output: {2}\n\n".format(Q_num, print_out, print_res))
                         return 0
@@ -297,7 +298,8 @@ class Main(QMainWindow):
                         return weight[Q_num-1]
                 else:
                     # This is the simple case: no newlines should be presented in desired ouput.
-                    if formatted_output not in result:
+                    # Again, if flexible, then everything is lower cased.
+                    if formatted_output.lower() not in result.lower():
                         with open(outfile, 'a') as f:
                             f.write("{0}. Incorrect\n     Desired output: {1} \n     Your output: {2}\n\n".format(Q_num, print_out, print_res))
                         return 0
@@ -344,9 +346,10 @@ class Main(QMainWindow):
                 if Q_num in flexible:
                     if type(outp[i]) is tuple:
                         # If the type is a tuple then we check each element of the tuple for containment in result.
+                        # We also lower case both the key and the submission when checking if flexible.
                         containment_check = []
                         for element in outp[i]:
-                            containment_check.append(str(element) in result)
+                            containment_check.append(str(element).lower() in result.lower())
                         
                         if False in containment_check:
                             success = False
@@ -359,7 +362,8 @@ class Main(QMainWindow):
                                 console_output.append("    -Test {0}: success\n".format(i+1))
                     else:
                         # This is the simple case: no newlines should be presented in desired ouput.
-                        if formatted_output not in result:
+                        # We also lower case both the key and the submission when checking if flexible.
+                        if formatted_output.lower() not in result.lower():
                             success = False
                             console_output.append("    -Test {0}: failure\n".format(i+1))
                             console_output.append("       Input: {0}\n       Desired output: {1}\n       Your output: {2}\n\n".format(inp[i], print_out, print_res))

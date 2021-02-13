@@ -37,4 +37,6 @@ Q10 = {
 
 Q_weight = [1,1,1,1,1,1,1,1,1,1]
 Q_flexible = [1,2,10]
+#Note: Don't use flexible if the desired output has multiple lines and you used \n to denote this.
+#      Use the tuple format instead to accomplish this.
 Q_all = [Q1,Q2,Q3,Q4,Q5,Q6,Q7,Q8,Q9,Q10]
