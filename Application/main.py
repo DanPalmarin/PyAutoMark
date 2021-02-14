@@ -30,7 +30,6 @@ class Main(QMainWindow):
         self.ui = Ui_MainWindow()
         self.ui.setupUi(self)
         
-        
         # Read in config settings from config.json
         with open(Path(self.main_dir, 'config.json'), 'r') as f:
             self.config = json.load(f)
@@ -122,16 +121,29 @@ class Main(QMainWindow):
         for zip_file in self.button2_list:
             # we continue to the next zip_file if the current one is in 'checked'
             if zip_file not in self.checked:
-                # Determine the student's name from the name of the submitted zip file
-                word = zip_file[zip_file.rfind('/')+1:]
-                word1 = "A{0}_".format(solMod.assignment_num)
-                word2 = word.replace(word1, '')
-                student_name = word2.replace('.zip', '')
+                # First, we determine if the zip_file was a bulk moodle download or an individual moodle download
+                # Bulk moodle download file format: 'firstname lastname_ID#_assignsubmission_file_.zip' - set by Moodle
+                # Individual moodle download file format: 'A#_firstname.zip' - set by me
+                keyword = "A{0}_".format(solMod.assignment_num) # from solution key
+                file_name = Path(zip_file).stem # returns the basename of the zip_file
+                if keyword in file_name:
+                    student_name = file_name.replace(keyword,'')
+                else:
+                    student_name = file_name[:file_name.find('_')]
                 
+                # word = zip_file[zip_file.rfind('/')+1:]
+                # word1 = "A{0}_".format(solMod.assignment_num)
+                # word2 = word.replace(word1, '')
+                # student_name = word2.replace('.zip', '')
+
                 # Define the output text file for this student
                 self.output_dir = Path(self.button2_dir, "Output_Summaries")
                 Path(self.output_dir).mkdir(parents=True, exist_ok=True) #checks if output_dir exists - if not, it creates it
-                self.output_file = Path(self.output_dir, "{0}{1}{2}".format(word1,student_name,".txt"))
+                
+                # Initialize the output text file.
+                # If the zip_file is from a bulk moodle download, the name must be file_name for easy feedback dump.
+                #self.output_file = Path(self.output_dir, "{0}{1}{2}".format(word1,student_name,".txt"))
+                self.output_file = Path(self.output_dir, "{0}{1}".format(file_name,".txt"))
                 with open(self.output_file, 'w') as f:
                     f.write("Assignment {0}\n\n".format(solMod.assignment_num))
                       
@@ -190,7 +202,8 @@ class Main(QMainWindow):
                 self.ui.table1.setItem(rowPosition,1, item)
                 
                 # Populate the list with the name of the output text file
-                self.ui.list1.addItem(QListWidgetItem("{0}{1}.txt".format(word1, student_name)))
+                self.ui.list1.addItem(QListWidgetItem("{0}.txt".format(file_name)))
+                #self.ui.list1.addItem(QListWidgetItem("{0}{1}.txt".format(word1, student_name)))
             
                 # Add zip_file to checked if it isn't in already
                 self.checked.append(zip_file)
@@ -518,13 +531,19 @@ class MoodleWindow(QWidget):
 
         # Iterate over each folder in self.student_submissions_dir
         for entry in os.scandir(self.new_moodle_dir):
-            for A_name_zip in Path(entry).iterdir():
-                shutil.move(A_name_zip, self.student_submissions_dir.joinpath(A_name_zip.name)) # replaces files if they already exist
-
+            # We prep future file for a single feedback file zip (following Moodle's formatting).
+            full_moodle_name = entry.name
+            for A_name_zip in Path(entry).iterdir(): # There should only be 1 zip file here
+                extension = os.path.splitext(A_name_zip)[1]
+                new_name = Path(full_moodle_name + extension)
+                #shutil.move(A_name_zip, self.student_submissions_dir.joinpath(A_name_zip.name)) # replaces files if they already exist
+                shutil.move(A_name_zip, self.student_submissions_dir.joinpath(new_name)) # replaces files if they already exist
+                
         # Delete the self.new_moodle_dir and all of its contents
         if Path(self.new_moodle_dir).is_dir():
             shutil.rmtree(self.new_moodle_dir)
         
+
         os.startfile(self.student_submissions_dir) # Windows only; this lauches the folder that contains the extracted student submissions
 
 
