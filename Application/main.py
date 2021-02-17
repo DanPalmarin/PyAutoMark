@@ -289,8 +289,10 @@ class Main(QMainWindow):
             result = self.running_assignments(trim_tail, None)
             
             # For printing out to text files
-            print_out = formatted_output.replace("\n", "\\n")
-            print_res = str(result).replace("\n", "\\n")
+            print_out = formatted_output.replace("\n", "   ")
+            print_res = str(result).replace("\n", "   ")
+            #print_out = formatted_output.replace("\n", "\\n")
+            #print_res = str(result).replace("\n", "\\n")
             
             # Report output or errors.
             # If Q_num is in solMod.Q_flexible, then we check only for containment.
@@ -300,7 +302,7 @@ class Main(QMainWindow):
                     # If the type is a tuple then we check each element of the tuple for containment in result.
                     containment_check = []
                     for element in outp[0]:
-                        containment_check.append(str(element).lower() in result.lower()) #holds True or False (lower case everything)
+                        containment_check.append(str(element).strip().lower() in result.strip().lower()) #holds True or False (lower case all and remove leading and ending spaces)
                     
                     if True in containment_check: # only require one True for a success
                         with open(outfile, 'a') as f:
@@ -313,7 +315,7 @@ class Main(QMainWindow):
                 else:
                     # This is the simple case: no newlines should be presented in desired ouput.
                     # Again, if flexible, then everything is lower cased.
-                    if formatted_output.lower() not in result.lower():
+                    if formatted_output.strip().lower() not in result.strip().lower():
                         with open(outfile, 'a') as f:
                             f.write("{0}. Incorrect\n     Desired output: {1} \n     Your output: {2}\n\n".format(Q_num, print_out, print_res))
                         return 0
@@ -352,8 +354,10 @@ class Main(QMainWindow):
                     result = self.running_assignments(trim_tail, str(inp[i]))
                 
                 # For printing out to text files
-                print_out = formatted_output.replace("\n", "\\n")
-                print_res = str(result).replace("\n", "\\n")
+                print_out = formatted_output.replace("\n", "   ")
+                print_res = str(result).replace("\n", "   ")
+                #print_out = formatted_output.replace("\n", "\\n")
+                #print_res = str(result).replace("\n", "\\n")
             
                 # Report output or errors.
                 # If Q_num is in solMod.Q_flexible, then we check only for containment
@@ -363,7 +367,7 @@ class Main(QMainWindow):
                         # We also lower case both the key and the submission when checking if flexible.
                         containment_check = []
                         for element in outp[i]:
-                            containment_check.append(str(element).lower() in result.lower())
+                            containment_check.append(str(element).strip().lower() in result.strip().lower())
                         
                         if False in containment_check:
                             success = False
@@ -377,7 +381,7 @@ class Main(QMainWindow):
                     else:
                         # This is the simple case: no newlines should be presented in desired ouput.
                         # We also lower case both the key and the submission when checking if flexible.
-                        if formatted_output.lower() not in result.lower():
+                        if formatted_output.strip().lower() not in result.strip().lower():
                             success = False
                             console_output.append("    -Test {0}: failure\n".format(i+1))
                             console_output.append("       Input: {0}\n       Desired output: {1}\n       Your output: {2}\n\n".format(inp[i], print_out, print_res))
