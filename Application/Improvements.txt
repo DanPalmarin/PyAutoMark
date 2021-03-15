@@ -1,2 +1,8 @@
 - Merge Moodle interface into the main window
-- Fix the 'submissions' folder directory
+- Make the 'submissions' folder directory to default to the location of the Moodle zip
+- Reorganize all solution keys to be in same folder (one for CS30 and one for CS20)
+- Reorganize all students submissions to be in the same folder (one for CS30 and one for CS20)
+- Before doing the a bove two points, make two radio buttons (CS20 and CS30). The config file will update according which is selected.
+- Alphabetize names from last names
+- Automatically generate 'ANUM_Feedback.zip'
+- Make moodle extraction overwrite previous files of the same name
