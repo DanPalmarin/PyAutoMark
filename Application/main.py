@@ -36,28 +36,44 @@ class Main(QMainWindow):
             
         # Define key variables
         self.button1_dir = self.config['default_dir1']
-        self.button2_dir = self.config['default_dir2']
+        self.button3_dir = self.config['default_dir2']
         self.button1_bool = False
-        self.button2_bool = False
+        self.button3_bool = False
+        self.radioButton1_bool = False
+        self.radiobutton3_bool = False
         self.checked = [] # this will hold all previously checked zipped file paths
         self.modules = [] # this will hold all previously imported student assignments
         self.win2button1_dir = self.config['default_dir_win2_1'] # On Moodle window
-        self.win2button2_dir = self.config['default_dir_win2_2'] # On Moodle window
+        self.win2button3_dir = self.config['default_dir_win2_2'] # On Moodle window
         
         # Define menubar functionality
-        self.ui.actionMoodle.triggered.connect(self.moodle_handler)
         self.ui.actionClear.triggered.connect(self.clear_handler)
         self.ui.actionReset.triggered.connect(self.reset_handler)
         self.ui.actionDocumentation_PDF.triggered.connect(self.doc_handler)
+        
+        # Define radio button functionality
+        self.ui.radioButton1.toggled.connect(self.radioButton_handler)
+        self.ui.radioButton2.toggled.connect(self.radioButton_handler)
         
         # Defining button functionality
         self.ui.button1.clicked.connect(self.button1_handler)
         self.ui.button2.clicked.connect(self.button2_handler)
         self.ui.button3.clicked.connect(self.button3_handler)
         self.ui.button4.clicked.connect(self.button4_handler)
+        #self.ui.button5.clicked.connect(self.button5_handler)
+        self.ui.button6.clicked.connect(self.button6_handler)
         
         # Define list functionality
         self.ui.list1.itemDoubleClicked.connect(self.list1_handler)
+        
+    def radioButton_handler(self):
+        # Decides which radio button is selected.
+        if self.ui.radioButton1.isChecked() == True:
+            self.radioButton1_bool = True
+            self.radioButton2_bool = False
+        elif self.ui.radioButton2.isChecked() == True:
+            self.radioButton1_bool = False
+            self.radioButton2_bool = True
         
     def button1_handler(self):
         filename = QFileDialog.getOpenFileName(None, "Select a solution key (.py).", self.button1_dir, "Python file (*.py)")
@@ -79,46 +95,49 @@ class Main(QMainWindow):
             self.button1_bool = False
             self.ui.label1.setText("")
         
-        if self.button1_bool == True and self.button2_bool == True:
-            self.ui.button3.setEnabled(True)
+        if self.button1_bool == True and self.button3_bool == True:
+            self.ui.button4.setEnabled(True)
         else:
-            self.ui.button3.setEnabled(False)
+            self.ui.button4.setEnabled(False)
             
     def button2_handler(self):
-        filename = QFileDialog.getOpenFileNames(None, "Select any number of student assignments (.zip).", self.button2_dir, "Zip file(s) (*.zip)")
-        self.button2_list = filename[0]
+        print("Button 2 working!")
+    
+    def button3_handler(self):
+        filename = QFileDialog.getOpenFileNames(None, "Select any number of student assignments (.zip).", self.button3_dir, "Zip file(s) (*.zip)")
+        self.button3_list = filename[0]
         
-        if self.button2_list != []:
+        if self.button3_list != []:
             # update label
-            self.ui.label2.setText("{0} zip file(s) selected".format(len(self.button2_list)))
-            self.button2_bool = True
+            self.ui.label3.setText("{0} zip file(s) selected".format(len(self.button3_list)))
+            self.button3_bool = True
             
-            self.button2_dir = os.path.dirname(self.button2_list[0]) # used in button3_handler
+            self.button3_dir = os.path.dirname(self.button3_list[0]) # used in button4_handler
             
             # update the config file
-            path = os.path.dirname(self.button2_list[0])
+            path = os.path.dirname(self.button3_list[0])
             self.config['default_dir2'] = path
             with open('config.json', 'w') as f:
                 json.dump(self.config, f)
         else:
-            self.button2_bool = False
-            self.ui.label2.setText("")
+            self.button3_bool = False
+            self.ui.label3.setText("")
             
-        if self.button1_bool == True and self.button2_bool == True:
-            self.ui.button3.setEnabled(True)
+        if self.button1_bool == True and self.button3_bool == True:
+            self.ui.button4.setEnabled(True)
         else:
-            self.ui.button3.setEnabled(False)
+            self.ui.button4.setEnabled(False)
              
-    def button3_handler(self):
+    def button4_handler(self):
         # Obtain needed paths and import the solution key 
         head, tail = os.path.split(self.button1_file) #store the sol dir and the sol file in separate local variables
         trim_tail = os.path.splitext(tail)[0]
         sys.path.insert(1, head) # places the desired dir in the correct place for import_module below
         solMod = import_module(trim_tail) # variables defined in trim_tail should be referenced as: solMod.variable
         
-        # Loop through each zip file in self.button2_list
-        self.extracted_dir = Path(self.button2_dir, "Temp_Extracted")
-        for zip_file in self.button2_list:
+        # Loop through each zip file in self.button3_list
+        self.extracted_dir = Path(self.button3_dir, "Temp_Extracted")
+        for zip_file in self.button3_list:
             # we continue to the next zip_file if the current one is in 'checked'
             if zip_file not in self.checked:
                 # First, we determine if the zip_file was a bulk moodle download or an individual moodle download
@@ -137,7 +156,7 @@ class Main(QMainWindow):
                 # student_name = word2.replace('.zip', '')
 
                 # Define the output text file for this student
-                self.output_dir = Path(self.button2_dir, "Output_Summaries")
+                self.output_dir = Path(self.button3_dir, "Output_Summaries")
                 Path(self.output_dir).mkdir(parents=True, exist_ok=True) #checks if output_dir exists - if not, it creates it
                 
                 # Initialize the output text file.
@@ -212,9 +231,9 @@ class Main(QMainWindow):
                 if Path(self.extracted_dir).is_dir():
                     shutil.rmtree(self.extracted_dir) # detete the 'Temp_Extracted' directory and all of its contents
         
-        self.ui.button4.setEnabled(True)
+        self.ui.button6.setEnabled(True)
 
-    def button4_handler(self):
+    def button6_handler(self):
         os.startfile(self.output_dir) # Windows only; this lauches the folder that contains the output .txt files (in explorer)
    
     def list1_handler(self, item):
@@ -247,9 +266,9 @@ class Main(QMainWindow):
             
         # Define key variables
         self.button1_dir = self.config['default_dir1']
-        self.button2_dir = self.config['default_dir2']
+        self.button3_dir = self.config['default_dir2']
         self.win2button1_dir = self.config['default_dir_win2_1']
-        self.win2button2_dir = self.config['default_dir_win2_2']
+        self.win2button3_dir = self.config['default_dir_win2_2']
         
         # Reset labels
         self.ui.label1.setText('')
@@ -257,9 +276,9 @@ class Main(QMainWindow):
         
         # Disable the bottom two buttons
         self.ui.button1_bool = False
-        self.ui.button2_bool = False
-        self.ui.button3.setEnabled(False)
+        self.ui.button3_bool = False
         self.ui.button4.setEnabled(False)
+        self.ui.button6.setEnabled(False)
         
     def config_initialize(self):
         config = {"default_dir1": self.main_dir, "default_dir2": self.main_dir, "default_dir_win2_1": self.main_dir, "default_dir_win2_2": self.main_dir} # This resets the default path to the program location
@@ -468,13 +487,13 @@ class MoodleWindow(QWidget):
         
         # Define key variables
         self.win2button1_bool = False
-        self.win2button2_bool = False
+        self.win2button3_bool = False
         
         # Defining button functionality
         self.ui.win2button1.clicked.connect(self.win2button1_handler)
-        self.ui.win2button2.clicked.connect(self.win2button2_handler)
         self.ui.win2button3.clicked.connect(self.win2button3_handler)
-        self.ui.win2button3.setEnabled(False)
+        self.ui.win2button4.clicked.connect(self.win2button4_handler)
+        self.ui.win2button4.setEnabled(False)
         
     def win2button1_handler(self):
         self.moodle_zip = QFileDialog.getOpenFileName(None, "Select a single Moodle zip file (.zip).", self.M.win2button1_dir, "Zip file (*.zip)")[0] #returns as tuple: (path, type)
@@ -496,20 +515,20 @@ class MoodleWindow(QWidget):
             self.ui.win2label1.setText("")
             self.win2button1_bool = False
         
-        if self.win2button1_bool == True and self.win2button2_bool == True:
-            self.ui.win2button3.setEnabled(True)
+        if self.win2button1_bool == True and self.win2button3_bool == True:
+            self.ui.win2button4.setEnabled(True)
         else:
-            self.ui.win2button3.setEnabled(False)
+            self.ui.win2button4.setEnabled(False)
     
-    def win2button2_handler(self):
-        student_dir = QFileDialog.getExistingDirectory(None, "Select a directory to extract student submissions.", self.M.win2button2_dir)
+    def win2button3_handler(self):
+        student_dir = QFileDialog.getExistingDirectory(None, "Select a directory to extract student submissions.", self.M.win2button3_dir)
         self.student_submissions_dir = Path(student_dir)
         student_dir_basename = self.student_submissions_dir.stem
         
         # update the config file if the user selected a zip
         if student_dir != "":
             self.ui.win2label2.setText(student_dir_basename)
-            self.win2button2_bool = True
+            self.win2button3_bool = True
             
             # update the config file
             self.M.config['default_dir_win2_2'] = str(self.student_submissions_dir)
@@ -517,14 +536,14 @@ class MoodleWindow(QWidget):
                 json.dump(self.M.config, f)
         else:
             self.ui.win2label2.setText("")
-            self.win2button2_bool = False
+            self.win2button3_bool = False
         
-        if self.win2button1_bool == True and self.win2button2_bool == True:
-            self.ui.win2button3.setEnabled(True)
+        if self.win2button1_bool == True and self.win2button3_bool == True:
+            self.ui.win2button4.setEnabled(True)
         else:
-            self.ui.win2button3.setEnabled(False)
+            self.ui.win2button4.setEnabled(False)
         
-    def win2button3_handler(self):
+    def win2button4_handler(self):
         # Checks if Student_Submissions folder exists - if not, it creates it in the directory that contains the Moodle zip
         #zipped_submissions = Path(self.student_submissions_dir, "Student_Submissions")
         Path(self.student_submissions_dir).mkdir(parents=True, exist_ok=True)

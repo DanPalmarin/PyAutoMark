@@ -23,7 +23,7 @@
     </rect>
    </property>
    <property name="text">
-    <string>Moodle file</string>
+    <string>Moodle zip</string>
    </property>
   </widget>
   <widget class="QPushButton" name="win2button3">
