@@ -38,6 +38,7 @@ class Main(QMainWindow):
         self.button1_dir = self.config['default_dir1']
         self.button3_dir = self.config['default_dir2']
         self.button1_bool = False
+        self.button2_bool = False
         self.button3_bool = False
         self.radioButton1_bool = False
         self.radiobutton3_bool = False
@@ -95,21 +96,48 @@ class Main(QMainWindow):
             self.button1_bool = False
             self.ui.label1.setText("")
         
-        if self.button1_bool == True and self.button3_bool == True:
+        # decides when to enable the "Run program" button
+        if self.button1_bool == True and self.button2_bool == True or self.button1_bool == True and self.button3_bool == True:
             self.ui.button4.setEnabled(True)
         else:
             self.ui.button4.setEnabled(False)
             
     def button2_handler(self):
-        print("Button 2 working!")
-    
+        self.moodle_zip = QFileDialog.getOpenFileName(None, "Select a single Moodle zip file (.zip).", self.button1_dir, "Zip file (*.zip)")[0] #returns as tuple: (path, type)
+        self.moodle_zip_file = Path(self.moodle_zip)
+        self.moodle_dir = Path(self.moodle_zip).resolve().parent # directory of the moodle zip
+        self.moodle_name = Path(self.moodle_zip).stem # basename of the moodle zip
+        self.new_moodle_dir = Path(self.moodle_dir, self.moodle_name) # directory of the future uncompressed Moodle zip
+        
+        # update the button label
+        if self.moodle_zip != "":
+            # counts the number of zip files in the Moodle zip
+            zip_file = zipfile.ZipFile(self.moodle_zip_file, 'r')
+            zip_file_num = 0
+            for file in zip_file.namelist():
+                zip_file_num += 1
+                
+            self.ui.label2.setText("{0} zip file(s) contained.".format(zip_file_num))
+            self.button2_bool = True
+            self.ui.button3.setEnabled(False)
+        else:
+            self.ui.label2.setText("")
+            self.button2_bool = False
+            self.ui.button3.setEnabled(True)
+        
+        # decides when to enable the "Run program" button
+        if self.button1_bool == True and self.button2_bool == True or self.button1_bool == True and self.button3_bool == True:
+            self.ui.button4.setEnabled(True)
+        else:
+            self.ui.button4.setEnabled(False)
+        
     def button3_handler(self):
         filename = QFileDialog.getOpenFileNames(None, "Select any number of student assignments (.zip).", self.button3_dir, "Zip file(s) (*.zip)")
         self.button3_list = filename[0]
         
         if self.button3_list != []:
             # update label
-            self.ui.label3.setText("{0} zip file(s) selected".format(len(self.button3_list)))
+            self.ui.label3.setText("{0} zip file(s) selected.".format(len(self.button3_list)))
             self.button3_bool = True
             
             self.button3_dir = os.path.dirname(self.button3_list[0]) # used in button4_handler
@@ -123,11 +151,12 @@ class Main(QMainWindow):
             self.button3_bool = False
             self.ui.label3.setText("")
             
-        if self.button1_bool == True and self.button3_bool == True:
+        # decides when to enable the "Run program" button
+        if self.button1_bool == True and self.button2_bool == True or self.button1_bool == True and self.button3_bool == True:
             self.ui.button4.setEnabled(True)
         else:
             self.ui.button4.setEnabled(False)
-             
+        
     def button4_handler(self):
         # Obtain needed paths and import the solution key 
         head, tail = os.path.split(self.button1_file) #store the sol dir and the sol file in separate local variables
@@ -135,103 +164,242 @@ class Main(QMainWindow):
         sys.path.insert(1, head) # places the desired dir in the correct place for import_module below
         solMod = import_module(trim_tail) # variables defined in trim_tail should be referenced as: solMod.variable
         
-        # Loop through each zip file in self.button3_list
-        self.extracted_dir = Path(self.button3_dir, "Temp_Extracted")
-        for zip_file in self.button3_list:
-            # we continue to the next zip_file if the current one is in 'checked'
-            if zip_file not in self.checked:
-                # First, we determine if the zip_file was a bulk moodle download or an individual moodle download
-                # Bulk moodle download file format: 'firstname lastname_ID#_assignsubmission_file_.zip' - set by Moodle
-                # Individual moodle download file format: 'A#_firstname.zip' - set by me
-                keyword = "A{0}_".format(solMod.assignment_num) # from solution key
-                file_name = Path(zip_file).stem # returns the basename of the zip_file
-                if keyword in file_name:
-                    student_name = file_name.replace(keyword,'')
-                else:
-                    student_name = file_name[:file_name.find('_')]
-                
-                # word = zip_file[zip_file.rfind('/')+1:]
-                # word1 = "A{0}_".format(solMod.assignment_num)
-                # word2 = word.replace(word1, '')
-                # student_name = word2.replace('.zip', '')
-
-                # Define the output text file for this student
-                self.output_dir = Path(self.button3_dir, "Output_Summaries")
-                Path(self.output_dir).mkdir(parents=True, exist_ok=True) #checks if output_dir exists - if not, it creates it
-                
-                # Initialize the output text file.
-                # If the zip_file is from a bulk moodle download, the name must be file_name for easy feedback dump.
-                #self.output_file = Path(self.output_dir, "{0}{1}{2}".format(word1,student_name,".txt"))
-                self.output_file = Path(self.output_dir, "{0}{1}".format(file_name,".txt"))
-                with open(self.output_file, 'w') as f:
-                    f.write("Assignment {0}\n\n".format(solMod.assignment_num))
-                      
-                # Extract zipped assignment submission
-                with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-                    zip_ref.extractall(self.extracted_dir)
-                
-                # Running grade total
-                self.grade = 0
-                NHI = False
-                
-                # Run each python script in extracted_dir and compare it to the inputs/outputs in solMod.Q_all
-                marked_questions = []
-                question_numbers = list(range(1,len(solMod.Q_all)+1))
-                
-                for i in question_numbers:
-                    mark = 0 # Initialize the mark that a student gets on a question as 0
-                    for entry in os.scandir(self.extracted_dir):
-                        if "A{0}_{1}.py".format(solMod.assignment_num, i) in entry.path:
-                            marked_questions.append(i)
-                            if type(solMod.Q_all[i-1]) is dict:
-                                inputs = list(solMod.Q_all[i-1].keys())
-                                outputs = list(solMod.Q_all[i-1].values())
-                                #call method
-                                mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible) 
-                            else:
-                                inputs = []
-                                outputs = [solMod.Q_all[i-1]]
-                                #call method
-                                mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible)
-                            break
-                            
-                    self.grade += mark
-                    
-                if question_numbers != marked_questions:
-                    unmarked_questions = sorted(list(set(question_numbers) - set(marked_questions)))
-                    with open(self.output_file, 'a') as f:
-                        output_arg = str(unmarked_questions)[1:-1]
-                        f.write("{0}The following questions were not found: {1}.".format(chr(0x002A), output_arg))
-                        NHI = True
-                
-                # Update table heading 'Grade' with the assignment total
-                item = self.ui.table1.horizontalHeaderItem(1)
-                item.setText("Grade /{0}".format(sum(solMod.Q_weight)))
-                
-                # Populate the table with the name of the student and his/her grade
-                rowPosition = self.ui.table1.rowCount()
-                self.ui.table1.insertRow(rowPosition)
-                self.ui.table1.setItem(rowPosition,0, QTableWidgetItem(student_name))
-                if NHI == True:
-                    item = QTableWidgetItem(str(self.grade)+ chr(0x002A))
-                else:
-                    item = QTableWidgetItem(str(self.grade))
-                
-                item.setTextAlignment(Qt.AlignCenter)
-                self.ui.table1.setItem(rowPosition,1, item)
-                
-                # Populate the list with the name of the output text file
-                self.ui.list1.addItem(QListWidgetItem("{0}.txt".format(file_name)))
-                #self.ui.list1.addItem(QListWidgetItem("{0}{1}.txt".format(word1, student_name)))
-            
-                # Add zip_file to checked if it isn't in already
-                self.checked.append(zip_file)
-                
-                # Detete the 'Temp_Extracted' directory and all of its contents
-                if Path(self.extracted_dir).is_dir():
-                    shutil.rmtree(self.extracted_dir) # detete the 'Temp_Extracted' directory and all of its contents
+        # If Moodle zip was used, we extract the files to the "Student_Submissions" folder contained in the directory with the Moodle zip.
+        # We then loop through each zipped submission.
+        # If "Assignments" button was used, we loop through each zip file in self.button3_list.
         
-        self.ui.button6.setEnabled(True)
+        if self.button2_bool == True:
+            # Checks if Student_Submissions folder exists - if not, it creates it in the directory that contains the Moodle zip
+            zipped_submissions = Path(self.moodle_dir, "Student_Submissions")
+            Path(zipped_submissions).mkdir(parents=True, exist_ok=True)
+            
+            # Define the output text file for this student
+            self.output_dir = Path(zipped_submissions, "Output_Summaries")
+            Path(self.output_dir).mkdir(parents=True, exist_ok=True) #checks if output_dir exists - if not, it creates it
+            
+            # Create the zip file of feedback files.
+            feedback_zip = zipfile.ZipFile(Path(self.output_dir, "Feedback_Files.zip"), 'w')
+        
+            # Extract the zipped Moodle file to self.new_moodle_dir
+            with zipfile.ZipFile(self.moodle_zip_file, 'r') as zip_ref:
+                zip_ref.extractall(self.new_moodle_dir)
+
+            # Iterate over each folder in "Student_Submissions"
+            moodle_zips_list = []
+            for entry in os.scandir(self.new_moodle_dir):
+                # We prep future file for a single feedback file zip (following Moodle's formatting).
+                # We need the name of each folder to be the name of each corresponding zip file inside each folder.
+                full_moodle_name = entry.name
+                for A_name_zip in Path(entry).iterdir(): # There should only be 1 zip file here
+                    extension = os.path.splitext(A_name_zip)[1]
+                    new_name = Path(full_moodle_name + extension)
+                    shutil.move(A_name_zip, zipped_submissions.joinpath(new_name)) # Moves each file to "Student_Submissions" folder and replaces files if they already exist.
+                    moodle_zips_list.append(str(Path(A_name_zip, zipped_submissions, new_name))) # Add new zipped file locations to a list to be iterated over later.
+            
+            # Delete the self.new_moodle_dir and all of its contents
+            if Path(self.new_moodle_dir).is_dir():
+                shutil.rmtree(self.new_moodle_dir)
+            
+            # We loop through each zip file in "Student_Submissions" and mark it.
+            self.extracted_dir = Path(zipped_submissions, "Temp_Extracted")
+            for zip_file in moodle_zips_list:
+                # we continue to the next zip_file if the current one is in 'checked'
+                if zip_file not in self.checked:
+                    # First, we determine if the zip_file was a bulk moodle download or an individual moodle download
+                    # Bulk moodle download file format: 'firstname lastname_ID#_assignsubmission_file_.zip' - set by Moodle
+                    # Individual moodle download file format: 'A#_firstname.zip' - set by me
+                    keyword = "A{0}_".format(solMod.assignment_num) # from solution key
+                    file_name = Path(zip_file).stem # returns the basename of the zip_file
+                    if keyword in file_name:
+                        student_name = file_name.replace(keyword,'')
+                    else:
+                        student_name = file_name[:file_name.find('_')]
+                    
+                    # word = zip_file[zip_file.rfind('/')+1:]
+                    # word1 = "A{0}_".format(solMod.assignment_num)
+                    # word2 = word.replace(word1, '')
+                    # student_name = word2.replace('.zip', '')
+
+
+                    # Initialize the output text file.
+                    # If the zip_file is from a bulk moodle download, the name must be file_name for easy feedback dump.
+                    #self.output_file = Path(self.output_dir, "{0}{1}{2}".format(word1,student_name,".txt"))
+                    self.output_file = Path(self.output_dir, "{0}{1}".format(file_name,".txt"))
+                    with open(self.output_file, 'w') as f:
+                        f.write("Assignment {0}\n\n".format(solMod.assignment_num))
+                          
+                    # Extract zipped assignment submission
+                    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+                        zip_ref.extractall(self.extracted_dir)
+                    
+                    # Running grade total
+                    self.grade = 0
+                    NHI = False
+                    
+                    # Run each python script in extracted_dir and compare it to the inputs/outputs in solMod.Q_all
+                    marked_questions = []
+                    question_numbers = list(range(1,len(solMod.Q_all)+1))
+                    
+                    for i in question_numbers:
+                        mark = 0 # Initialize the mark that a student gets on a question as 0
+                        for entry in os.scandir(self.extracted_dir):
+                            if "A{0}_{1}.py".format(solMod.assignment_num, i) in entry.path:
+                                marked_questions.append(i)
+                                if type(solMod.Q_all[i-1]) is dict:
+                                    inputs = list(solMod.Q_all[i-1].keys())
+                                    outputs = list(solMod.Q_all[i-1].values())
+                                    #call method
+                                    mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible) 
+                                else:
+                                    inputs = []
+                                    outputs = [solMod.Q_all[i-1]]
+                                    #call method
+                                    mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible)
+                                break
+                                
+                        self.grade += mark
+                        
+                    if question_numbers != marked_questions:
+                        unmarked_questions = sorted(list(set(question_numbers) - set(marked_questions)))
+                        with open(self.output_file, 'a') as f:
+                            output_arg = str(unmarked_questions)[1:-1]
+                            f.write("{0}The following questions were not found: {1}.".format(chr(0x002A), output_arg))
+                            NHI = True
+                    
+                    # Update table heading 'Grade' with the assignment total
+                    item = self.ui.table1.horizontalHeaderItem(1)
+                    item.setText("Grade /{0}".format(sum(solMod.Q_weight)))
+                    
+                    # Populate the table with the name of the student and his/her grade
+                    rowPosition = self.ui.table1.rowCount()
+                    self.ui.table1.insertRow(rowPosition)
+                    self.ui.table1.setItem(rowPosition,0, QTableWidgetItem(student_name))
+                    if NHI == True:
+                        item = QTableWidgetItem(str(self.grade)+ chr(0x002A))
+                    else:
+                        item = QTableWidgetItem(str(self.grade))
+                    
+                    item.setTextAlignment(Qt.AlignCenter)
+                    self.ui.table1.setItem(rowPosition,1, item)
+                    
+                    # Populate the list with the name of the output text file
+                    self.ui.list1.addItem(QListWidgetItem("{0}.txt".format(file_name)))
+                    #self.ui.list1.addItem(QListWidgetItem("{0}{1}.txt".format(word1, student_name)))
+                
+                    # Add zip_file to checked if it isn't in already
+                    self.checked.append(zip_file)
+                    
+                    # Delete the 'Temp_Extracted' directory and all of its contents
+                    if Path(self.extracted_dir).is_dir():
+                        shutil.rmtree(self.extracted_dir) # delete the 'Temp_Extracted' directory and all of its contents
+            
+                    # Add each feedback text file to feedback_zip.
+                    #feedback_zip.write(str(self.output_file))
+                    feedback_zip.write(self.output_file, os.path.basename(self.output_file))
+                    
+                    
+                    self.ui.button6.setEnabled(True)
+            
+            feedback_zip.close()
+            
+        elif self.button3_bool == True:
+            # Loop through each zip file in self.button3_list
+            self.extracted_dir = Path(self.button3_dir, "Temp_Extracted")
+            for zip_file in self.button3_list:
+                # we continue to the next zip_file if the current one is in 'checked'
+                if zip_file not in self.checked:
+                    # First, we determine if the zip_file was a bulk moodle download or an individual moodle download
+                    # Bulk moodle download file format: 'firstname lastname_ID#_assignsubmission_file_.zip' - set by Moodle
+                    # Individual moodle download file format: 'A#_firstname.zip' - set by me
+                    keyword = "A{0}_".format(solMod.assignment_num) # from solution key
+                    file_name = Path(zip_file).stem # returns the basename of the zip_file
+                    if keyword in file_name:
+                        student_name = file_name.replace(keyword,'')
+                    else:
+                        student_name = file_name[:file_name.find('_')]
+                    
+                    # word = zip_file[zip_file.rfind('/')+1:]
+                    # word1 = "A{0}_".format(solMod.assignment_num)
+                    # word2 = word.replace(word1, '')
+                    # student_name = word2.replace('.zip', '')
+
+                    # Define the output text file for this student
+                    self.output_dir = Path(self.button3_dir, "Output_Summaries")
+                    Path(self.output_dir).mkdir(parents=True, exist_ok=True) #checks if output_dir exists - if not, it creates it
+                    
+                    # Initialize the output text file.
+                    # If the zip_file is from a bulk moodle download, the name must be file_name for easy feedback dump.
+                    #self.output_file = Path(self.output_dir, "{0}{1}{2}".format(word1,student_name,".txt"))
+                    self.output_file = Path(self.output_dir, "{0}{1}".format(file_name,".txt"))
+                    with open(self.output_file, 'w') as f:
+                        f.write("Assignment {0}\n\n".format(solMod.assignment_num))
+                          
+                    # Extract zipped assignment submission
+                    with zipfile.ZipFile(zip_file, 'r') as zip_ref:
+                        zip_ref.extractall(self.extracted_dir)
+                    
+                    # Running grade total
+                    self.grade = 0
+                    NHI = False
+                    
+                    # Run each python script in extracted_dir and compare it to the inputs/outputs in solMod.Q_all
+                    marked_questions = []
+                    question_numbers = list(range(1,len(solMod.Q_all)+1))
+                    
+                    for i in question_numbers:
+                        mark = 0 # Initialize the mark that a student gets on a question as 0
+                        for entry in os.scandir(self.extracted_dir):
+                            if "A{0}_{1}.py".format(solMod.assignment_num, i) in entry.path:
+                                marked_questions.append(i)
+                                if type(solMod.Q_all[i-1]) is dict:
+                                    inputs = list(solMod.Q_all[i-1].keys())
+                                    outputs = list(solMod.Q_all[i-1].values())
+                                    #call method
+                                    mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible) 
+                                else:
+                                    inputs = []
+                                    outputs = [solMod.Q_all[i-1]]
+                                    #call method
+                                    mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible)
+                                break
+                                
+                        self.grade += mark
+                        
+                    if question_numbers != marked_questions:
+                        unmarked_questions = sorted(list(set(question_numbers) - set(marked_questions)))
+                        with open(self.output_file, 'a') as f:
+                            output_arg = str(unmarked_questions)[1:-1]
+                            f.write("{0}The following questions were not found: {1}.".format(chr(0x002A), output_arg))
+                            NHI = True
+                    
+                    # Update table heading 'Grade' with the assignment total
+                    item = self.ui.table1.horizontalHeaderItem(1)
+                    item.setText("Grade /{0}".format(sum(solMod.Q_weight)))
+                    
+                    # Populate the table with the name of the student and his/her grade
+                    rowPosition = self.ui.table1.rowCount()
+                    self.ui.table1.insertRow(rowPosition)
+                    self.ui.table1.setItem(rowPosition,0, QTableWidgetItem(student_name))
+                    if NHI == True:
+                        item = QTableWidgetItem(str(self.grade)+ chr(0x002A))
+                    else:
+                        item = QTableWidgetItem(str(self.grade))
+                    
+                    item.setTextAlignment(Qt.AlignCenter)
+                    self.ui.table1.setItem(rowPosition,1, item)
+                    
+                    # Populate the list with the name of the output text file
+                    self.ui.list1.addItem(QListWidgetItem("{0}.txt".format(file_name)))
+                    #self.ui.list1.addItem(QListWidgetItem("{0}{1}.txt".format(word1, student_name)))
+                
+                    # Add zip_file to checked if it isn't in already
+                    self.checked.append(zip_file)
+                    
+                    # Detete the 'Temp_Extracted' directory and all of its contents
+                    if Path(self.extracted_dir).is_dir():
+                        shutil.rmtree(self.extracted_dir) # detete the 'Temp_Extracted' directory and all of its contents
+            
+            self.ui.button6.setEnabled(True)
 
     def button6_handler(self):
         os.startfile(self.output_dir) # Windows only; this lauches the folder that contains the output .txt files (in explorer)
