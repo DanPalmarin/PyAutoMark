@@ -74,10 +74,8 @@ class Main(QMainWindow):
 
     def button1_handler(self):
         if self.ui.radioButton1.isChecked():
-            print(self.CS20button1_dir)
             filename = QFileDialog.getOpenFileName(None, "Select a solution key (.py).", self.CS20button1_dir, "Python file (*.py)")
         elif self.ui.radioButton2.isChecked():
-            print(self.CS30button1_dir)
             filename = QFileDialog.getOpenFileName(None, "Select a solution key (.py).", self.CS30button1_dir, "Python file (*.py)")
             
         self.button1_file = filename[0]
@@ -228,8 +226,12 @@ class Main(QMainWindow):
                 if zip_file not in self.checked:
                     # Bulk moodle download file format: 'firstname lastname_ID#_assignsubmission_file_.zip' - set by Moodle
                     file_name = Path(zip_file).stem # returns the basename of the zip_file
+                    
+                    #When the moodle zip is selected, it's nice to report the student names as "last, first", to match Aspen.
                     student_name = file_name[:file_name.find('_')]
-
+                    student_name = student_name.split()
+                    student_name = "{}, {}".format(student_name[1], student_name[0])
+                    
                     # Initialize the output text file.
                     # Define the output text file for this student
                     self.output_dir = Path(zipped_submissions, "Output_Summaries")

@@ -1,6 +1,4 @@
-- Increase names table column width
-- Alphabetize names from last names
-- Automatically generate 'ANUM_Feedback.zip'
+
 
 
 BUG
@@ -12,6 +10,9 @@ works just fine.
 
 Done:
 
+- Increase names table column width
+- Alphabetize names from last names
+- Automatically generate 'ANUM_Feedback.zip'
 - Before doing the above two points, make two radio buttons (CS20 and CS30). The config file will update according which is selected.
 - Merge Moodle interface into the main window
 - Make the 'submissions' folder directory to default to the location of the Moodle zip
