@@ -195,31 +195,56 @@ class Main(QMainWindow):
         # If "Assignments" button was used, we loop through each zip file in self.button3_list.
         
         if self.button2_bool == True:
+            # Initialize the error_log list
+            self.error_log_list = []
+              
             # Checks if Student_Submissions folder exists - if not, it creates it in the directory that contains the Moodle zip
             zipped_submissions = Path(self.moodle_dir, "Student_Submissions")
             Path(zipped_submissions).mkdir(parents=True, exist_ok=True)
-
+            
+            # Initialize the output text file.
+            # Define the output text file for this student
+            self.output_dir = Path(zipped_submissions, "Output_Summaries")
+            Path(self.output_dir).mkdir(parents=True, exist_ok=True) #checks if output_dir exists - if not, it creates it
+            
             # Extract the zipped Moodle file to self.new_moodle_dir
             with zipfile.ZipFile(self.moodle_zip_file, 'r') as zip_ref:
                 zip_ref.extractall(self.new_moodle_dir)
-
-            # Iterate over each folder in "Student_Submissions"
+            
+            # We iterate over each folder in "Student_Submissions".
             moodle_zips_list = []
             for entry in os.scandir(self.new_moodle_dir):
                 # We prep future file for a single feedback file zip (following Moodle's formatting).
                 # We need the name of each folder to be the name of each corresponding zip file inside each folder.
                 full_moodle_name = entry.name
-                for A_name_zip in Path(entry).iterdir(): # There should only be 1 zip file here
+                
+                ### OLD (WORKING) CODE ###
+                # for A_name_zip in Path(entry).iterdir(): # There will only be 1 zip file here. This is guaranteed by the Moodle zip process.
+                    # extension = os.path.splitext(A_name_zip)[1]
+                    # new_name = Path(full_moodle_name + extension)
+                    # shutil.move(A_name_zip, zipped_submissions.joinpath(new_name)) # Moves each file to "Student_Submissions" folder and replaces files if they already exist.
+                    # moodle_zips_list.append(str(Path(A_name_zip, zipped_submissions, new_name))) # Add new zipped file locations to a list to be iterated over later.
+                
+                for A_name_zip in Path(entry).iterdir(): # There will only be 1 zip file here. This is guaranteed by the Moodle zip process.
+                    # Check that A_name_zip is in a reasonably good format before adding it to the moodle_zips_list.
+                    # It must contain at least one .py file that isn't part of any parent subdirectory; i.e. "somedir/A1_1.py" - this is bad.
+                    with zipfile.ZipFile(A_name_zip, 'r') as zip_obj:
+                        list_of_files = zip_obj.namelist()
+                    
                     extension = os.path.splitext(A_name_zip)[1]
                     new_name = Path(full_moodle_name + extension)
-                    shutil.move(A_name_zip, zipped_submissions.joinpath(new_name)) # Moves each file to "Student_Submissions" folder and replaces files if they already exist.
-                    moodle_zips_list.append(str(Path(A_name_zip, zipped_submissions, new_name))) # Add new zipped file locations to a list to be iterated over later.
+                    if any(Path(fname).suffix == '.py' and fname.find('/') == -1 for fname in list_of_files):
+                        shutil.move(A_name_zip, zipped_submissions.joinpath(new_name)) # Moves each file to "Student_Submissions" folder and replaces files if they already exist.
+                        moodle_zips_list.append(str(Path(A_name_zip, zipped_submissions, new_name))) # Add new zipped file locations to a list to be iterated over later.
+                    else:
+                        self.error_log_list.append(str(Path(A_name_zip, zipped_submissions, new_name)))
             
             # Delete the self.new_moodle_dir and all of its contents
             if Path(self.new_moodle_dir).is_dir():
                 shutil.rmtree(self.new_moodle_dir)
             
             # We loop through each zip file in "Student_Submissions" and mark it.
+            
             self.extracted_dir = Path(zipped_submissions, "Temp_Extracted")
             for zip_file in moodle_zips_list:
                 # we continue to the next zip_file if the current one is in 'checked'
@@ -234,8 +259,8 @@ class Main(QMainWindow):
                     
                     # Initialize the output text file.
                     # Define the output text file for this student
-                    self.output_dir = Path(zipped_submissions, "Output_Summaries")
-                    Path(self.output_dir).mkdir(parents=True, exist_ok=True) #checks if output_dir exists - if not, it creates it
+                    # self.output_dir = Path(zipped_submissions, "Output_Summaries")
+                    # Path(self.output_dir).mkdir(parents=True, exist_ok=True) #checks if output_dir exists - if not, it creates it
                     
                     # If the zip_file is from a bulk moodle download, the name must be file_name for easy feedback dump.
                     self.output_file = Path(self.output_dir, "{0}{1}".format(file_name,".txt"))
@@ -307,7 +332,31 @@ class Main(QMainWindow):
                     if Path(self.extracted_dir).is_dir():
                         shutil.rmtree(self.extracted_dir) # delete the 'Temp_Extracted' directory and all of its contents
                     
-            
+            #If the error_log_list isn't empty, we write it's contents to a text file.
+            if len(self.error_log_list) != 0:
+                for file_name in self.error_log_list:
+                    file_name = file_name[:file_name.rfind('\\')+1] + "Output_Summaries\\" + file_name[file_name.rfind('\\'):file_name.rfind('.')]
+                    file_name = Path(file_name)
+                    self.output_file = Path(self.output_dir, "{0}{1}".format(file_name,".txt"))
+                    with open(self.output_file, 'w') as f:
+                        f.write("ERROR - bad format. Please make sure that you formatted your zip file correctly. Ask for assistance if needed. Please resubmit your assignment with a correctly formatted zip file.")
+                    
+                    # If the error_log_list isn't empty, we update the table with its contents.
+                    #When the moodle zip is selected, it's nice to report the student names as "last, first", to match Aspen.
+                    file_name = file_name.stem
+                    student_name = file_name[:file_name.find('_')]
+                    student_name = student_name.split()
+                    student_name = "{}, {}".format(student_name[1], student_name[0])
+                    rowPosition = self.ui.table1.rowCount()
+                    self.ui.table1.insertRow(rowPosition)
+                    self.ui.table1.setItem(rowPosition,0, QTableWidgetItem(student_name))
+                    item = QTableWidgetItem("BAD FORMAT")
+                    item.setTextAlignment(Qt.AlignCenter)
+                    self.ui.table1.setItem(rowPosition,1, item)
+                    
+                    # Populate the list with the name of the output text file
+                    self.ui.list1.addItem(QListWidgetItem("{0}.txt".format(file_name)))
+                    
             # Add each feedback text file to feedback_zip.
             feedback_zip = zipfile.ZipFile(Path(self.output_dir, "Feedback_Files.zip"), 'w')
             for feedback_file in os.listdir(self.output_dir):
@@ -332,7 +381,15 @@ class Main(QMainWindow):
                         student_name = file_name.replace(keyword,'')
                     else:
                         student_name = file_name[:file_name.find('_')]
-
+                    
+                    # # Next, we check that the zip file is in the correct format.
+                    # with zipfile.ZipFile(zip_file, 'r') as zip_obj:
+                        # list_of_files = zip_obj.namelist()
+                    
+                    # if not any(Path(fname).suffix == '.py' and fname.find('/') == -1 for fname in list_of_files):
+                        # self.error_log_list.append(student_name)
+                        # continue
+                    
                     # Initialize the output text file.
                     # Define the output text file for this student
                     self.output_dir = Path(self.CS20button3_dir, "Output_Summaries")
@@ -408,7 +465,6 @@ class Main(QMainWindow):
                     # Detete the 'Temp_Extracted' directory and all of its contents
                     if Path(self.extracted_dir).is_dir():
                         shutil.rmtree(self.extracted_dir) # detete the 'Temp_Extracted' directory and all of its contents
-            
             self.ui.button6.setEnabled(True)
 
     def button6_handler(self):
@@ -432,6 +488,7 @@ class Main(QMainWindow):
         item.setText("Grade")
         self.ui.list1.clear()
         self.checked = []
+        self.error_log_list = []
         self.config_initialize()
         
         # Read in config settings from config.json
