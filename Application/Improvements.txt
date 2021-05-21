@@ -2,6 +2,8 @@
 
 
 BUG
+- Clear and running program again seems to yield some blanks in the grades
+
 - If the key question input is something like:
 Q3 = ("L2: 1 item", "L3: 5 items")
 then it doesn't match student work. But

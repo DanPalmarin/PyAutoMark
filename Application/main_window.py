@@ -16,16 +16,17 @@ class Ui_MainWindow(object):
         MainWindow.setObjectName("MainWindow")
         MainWindow.resize(591, 675)
         MainWindow.setFixedSize(591, 675) # makes it so that you can't resize the window
+        MainWindow.setWindowIcon(QtGui.QIcon('icon.ico'))
         
         # Defining each widget and its properties (from QtDesigner)
-        
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.groupBox2 = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox2.setGeometry(QtCore.QRect(20, 70, 551, 101))
         self.groupBox2.setObjectName("groupBox2")
         self.button1 = QtWidgets.QPushButton(self.groupBox2)
-        self.button1.setGeometry(QtCore.QRect(10, 20, 91, 31))
+        #self.button1.setGeometry(QtCore.QRect(10, 20, 91, 31)) #for 'Windowsvista' style
+        self.button1.setGeometry(QtCore.QRect(10, 26, 91, 31)) #for 'Fusion' style
         self.button1.setObjectName("button1")
         self.label1 = QtWidgets.QLabel(self.groupBox2)
         self.label1.setGeometry(QtCore.QRect(110, 30, 151, 21))
@@ -33,7 +34,8 @@ class Ui_MainWindow(object):
         self.label1.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextSelectableByMouse)
         self.label1.setObjectName("label1")
         self.button2 = QtWidgets.QPushButton(self.groupBox2)
-        self.button2.setGeometry(QtCore.QRect(10, 60, 91, 31))
+        #self.button2.setGeometry(QtCore.QRect(10, 60, 91, 31))
+        self.button2.setGeometry(QtCore.QRect(10, 62, 91, 31)) #for 'Fusion' style
         self.button2.setObjectName("button2")
         self.label2 = QtWidgets.QLabel(self.groupBox2)
         self.label2.setGeometry(QtCore.QRect(110, 70, 151, 21))
@@ -46,16 +48,19 @@ class Ui_MainWindow(object):
         self.label3.setTextInteractionFlags(QtCore.Qt.LinksAccessibleByMouse|QtCore.Qt.TextSelectableByMouse)
         self.label3.setObjectName("label3")
         self.button3 = QtWidgets.QPushButton(self.groupBox2)
-        self.button3.setGeometry(QtCore.QRect(280, 60, 91, 31))
+        #self.button3.setGeometry(QtCore.QRect(280, 60, 91, 31))
+        self.button3.setGeometry(QtCore.QRect(170, 62, 91, 31)) #for 'Fusion' style
         self.button3.setObjectName("button3")
         self.groupBox1 = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox1.setGeometry(QtCore.QRect(20, 10, 551, 51))
         self.groupBox1.setObjectName("groupBox1")
         self.radioButton1 = QtWidgets.QRadioButton(self.groupBox1)
-        self.radioButton1.setGeometry(QtCore.QRect(20, 10, 131, 41))
+        self.radioButton1.setGeometry(QtCore.QRect(10, 15, 131, 41)) #for 'Fusion' style
+        #self.radioButton1.setGeometry(QtCore.QRect(20, 10, 131, 41)) #for 'Windowsvista' style
         self.radioButton1.setObjectName("radioButton1")
         self.radioButton2 = QtWidgets.QRadioButton(self.groupBox1)
-        self.radioButton2.setGeometry(QtCore.QRect(170, 10, 131, 41))
+        #self.radioButton2.setGeometry(QtCore.QRect(170, 10, 131, 41)) #for 'Windowsvista' style
+        self.radioButton2.setGeometry(QtCore.QRect(170, 15, 131, 41)) #for 'Fusion' style
         self.radioButton2.setObjectName("radioButton2")
         self.groupBox3 = QtWidgets.QGroupBox(self.centralwidget)
         self.groupBox3.setGeometry(QtCore.QRect(20, 180, 551, 451))
@@ -100,7 +105,8 @@ class Ui_MainWindow(object):
         self.button6.setGeometry(QtCore.QRect(350, 410, 191, 31))
         self.button6.setObjectName("button6")
         self.button4 = QtWidgets.QPushButton(self.groupBox3)
-        self.button4.setGeometry(QtCore.QRect(10, 20, 91, 31))
+        #self.button4.setGeometry(QtCore.QRect(10, 20, 91, 31))
+        self.button4.setGeometry(QtCore.QRect(10, 25, 91, 31))
         self.button4.setObjectName("button4")
         # self.button5 = QtWidgets.QPushButton(self.groupBox3)
         # self.button5.setGeometry(QtCore.QRect(110, 20, 91, 31))
@@ -144,7 +150,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "PyAutoMark"))
         self.groupBox2.setTitle(_translate("MainWindow", "File selection"))
         self.button1.setStatusTip(_translate("MainWindow", "Select the desired assignment key .py file."))
         self.button1.setText(_translate("MainWindow", "Assignment key"))
@@ -191,6 +197,7 @@ class Ui_MainWindow(object):
 if __name__ == "__main__":
     import sys
     app = QtWidgets.QApplication(sys.argv)
+    app.setStyle('Fusion')
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
