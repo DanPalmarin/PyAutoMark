@@ -195,13 +195,17 @@ class Ui_MainWindow(object):
         self.label2.setWordWrap(True)
 
 if __name__ == "__main__":
-    import sys
+    import os
+    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+    
     # Handle high resolution displays:
     if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
         QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+    
     if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
         QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
     
+    import sys
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
     #pp.setStyleSheet("QLabel{font-size: 11pt;}")
