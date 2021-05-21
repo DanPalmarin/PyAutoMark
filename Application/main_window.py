@@ -196,8 +196,15 @@ class Ui_MainWindow(object):
 
 if __name__ == "__main__":
     import sys
+    # Handle high resolution displays:
+    if hasattr(QtCore.Qt, 'AA_EnableHighDpiScaling'):
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_EnableHighDpiScaling, True)
+    if hasattr(QtCore.Qt, 'AA_UseHighDpiPixmaps'):
+        QtWidgets.QApplication.setAttribute(QtCore.Qt.AA_UseHighDpiPixmaps, True)
+    
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
+    #pp.setStyleSheet("QLabel{font-size: 11pt;}")
     MainWindow = QtWidgets.QMainWindow()
     ui = Ui_MainWindow()
     ui.setupUi(MainWindow)
