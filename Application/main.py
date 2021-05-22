@@ -665,15 +665,15 @@ class Main(QMainWindow):
 
 
 if __name__ == '__main__':
-    import os
-    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "0"
+    #import os
+    #os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
     
-    # Handle high resolution displays:
-    if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-        QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
+    # # Handle high resolution displays:
+    # if hasattr(Qt, 'AA_EnableHighDpiScaling'):
+        # QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
     
-    if hasattr(Qt, 'AA_UseHighDpiPixmaps'):
-        QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
+    # if hasattr(Qt, 'AA_UseHighDpiPixmaps'):
+        # QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
         
     app = QApplication(sys.argv)
     #app.setStyle("Windowsvista")
