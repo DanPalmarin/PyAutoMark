@@ -209,6 +209,9 @@ class Ui_MainWindow(object):
         self.label2.setWordWrap(True)
         
 if __name__ == "__main__":
+    import os
+    os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
+    
     import sys
     app = QtWidgets.QApplication(sys.argv)
     app.setStyle('Fusion')
