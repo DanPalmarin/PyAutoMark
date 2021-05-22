@@ -61,7 +61,10 @@
           <cursorShape>IBeamCursor</cursorShape>
          </property>
          <property name="text">
-          <string># of assignments contained</string>
+          <string/>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
          </property>
          <property name="textInteractionFlags">
           <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
@@ -96,7 +99,10 @@
           <cursorShape>IBeamCursor</cursorShape>
          </property>
          <property name="text">
-          <string>Key name</string>
+          <string/>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
          </property>
          <property name="textInteractionFlags">
           <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
@@ -109,7 +115,10 @@
           <cursorShape>IBeamCursor</cursorShape>
          </property>
          <property name="text">
-          <string># of assignments selected</string>
+          <string/>
+         </property>
+         <property name="wordWrap">
+          <bool>true</bool>
          </property>
          <property name="textInteractionFlags">
           <set>Qt::LinksAccessibleByMouse|Qt::TextSelectableByMouse</set>
