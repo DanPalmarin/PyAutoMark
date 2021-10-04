@@ -456,7 +456,7 @@ class Main(QMainWindow):
         self.ui.button2_bool = False
         self.ui.button3_bool = False
         self.ui.button4.setEnabled(False)
-        self.ui.button5.setEnabled(False)
+        # self.ui.button5.setEnabled(False)
         self.ui.button6.setEnabled(False)
         
     def config_initialize(self):
