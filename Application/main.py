@@ -3,7 +3,6 @@ import os
 import shutil
 import json
 import zipfile
-import builtins #UNUSED
 from pathlib import Path
 from contextlib import contextmanager, redirect_stdout
 from io import StringIO
@@ -13,7 +12,6 @@ from PyQt5.QtGui     import *
 from PyQt5.QtCore    import *
 from main_window import Ui_MainWindow
 #from moodle_window import Ui_MoodleWindow
-
 
 class Main(QMainWindow):
     def __init__(self):
@@ -646,9 +644,6 @@ class Main(QMainWindow):
                         res = "Error: {0}".format(err)
         
         return res
-    
-    ##### TESTING #####
-    #def bar(self):
         
     def in_out_with_newlines(self, some_tuple):
         new_string = ""
