@@ -3,6 +3,7 @@ import os
 import shutil
 import json
 import zipfile
+import builtins #UNUSED
 from pathlib import Path
 from contextlib import contextmanager, redirect_stdout
 from io import StringIO
@@ -10,7 +11,6 @@ from importlib import import_module, reload
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui     import *
 from PyQt5.QtCore    import *
-
 from main_window import Ui_MainWindow
 #from moodle_window import Ui_MoodleWindow
 
@@ -644,8 +644,12 @@ class Main(QMainWindow):
                         res = output_feed.getvalue().rstrip()
                     except Exception as err:
                         res = "Error: {0}".format(err)
+        
         return res
     
+    ##### TESTING #####
+    #def bar(self):
+        
     def in_out_with_newlines(self, some_tuple):
         new_string = ""
         for x in some_tuple:
