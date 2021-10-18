@@ -202,6 +202,7 @@ class Main(QMainWindow):
                 zip_ref.extractall(self.new_moodle_dir)
 
             # Iterate over each folder in "Student_Submissions"
+            # moodle_zips_list will hold on to each student zipped submission (still zipped) with a newly formatted name.
             moodle_zips_list = []
             for entry in os.scandir(self.new_moodle_dir):
                 # We prep future file for a single feedback file zip (following Moodle's formatting).
@@ -230,6 +231,7 @@ class Main(QMainWindow):
                     student_name = student_name.split()
                     student_name = "{}, {}".format(student_name[1], student_name[0])
                     
+                    print(student_name)
                     # Initialize the output text file.
                     # Define the output text file for this student
                     self.output_dir = Path(zipped_submissions, "Output_Summaries")
@@ -257,6 +259,9 @@ class Main(QMainWindow):
                         for entry in os.scandir(self.extracted_dir):
                             if "A{0}_{1}.py".format(solMod.assignment_num, i) in entry.path:
                                 marked_questions.append(i)
+                                
+                                ### Here's where we append the student name to the file name so that each imported script is unique (to avoid builtin function
+                                print(entry.path)
                                 if type(solMod.Q_all[i-1]) is dict:
                                     inputs = list(solMod.Q_all[i-1].keys())
                                     outputs = list(solMod.Q_all[i-1].values())
