@@ -2,9 +2,7 @@
 
 
 BUG
-- Reset button closes program.
-
-- Clear and running program again seems to yield some blanks in the grades (try CS30 A8 to A9 or between A9 and A10).
+- Clear and running program again seems to yield some blanks in the grades (try CS30 A8 to A9 or between A9 and A10). (POSSIBLY FIXED)
 
 - If the key question input is something like:
 Q3 = ("L2: 1 item", "L3: 5 items")
