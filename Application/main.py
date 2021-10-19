@@ -231,7 +231,10 @@ class Main(QMainWindow):
                     student_name = student_name.split()
                     student_name = "{}, {}".format(student_name[1], student_name[0])
                     
-                    print(student_name)
+                    #We make a version of student_name without "-" or ", ", so that the file name is safe when we import them as modules.
+                    safe_student_name = student_name.replace(", ", "")
+                    safe_student_name = safe_student_name.replace("-", "")
+                    
                     # Initialize the output text file.
                     # Define the output text file for this student
                     self.output_dir = Path(zipped_submissions, "Output_Summaries")
@@ -246,6 +249,18 @@ class Main(QMainWindow):
                     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
                         zip_ref.extractall(self.extracted_dir)
                     
+                    ### Change name of each A#_# to be A#_#NAME so that each module is unique.
+                    for entry in os.scandir(self.extracted_dir):
+                        ### Here's where we append the student name to the file name so that each imported script is unique (to avoid builtin function overwrite errors)
+                        old_entry = Path(entry.path) # Full path to .py file as a string.
+                        entry_dir = old_entry.parent # C:\Users\USERNAME\some_directories\Temp_Extracted
+                        old_entry_tail = old_entry.stem # A#_#
+                        entry_ext = old_entry.suffix # .py extension
+                        new_entry = "{}\{}{}{}".format(entry_dir, old_entry_tail, safe_student_name, entry_ext) #Full_dir\Temp_Extracted\A#_#NAME.py
+                        new_entry = Path(new_entry)
+                        new_entry_tail = new_entry.stem # A#_#NAME
+                        os.rename(old_entry, new_entry) #rename the current .py file
+                    
                     # Running grade total
                     self.grade = 0
                     NHI = False
@@ -257,21 +272,21 @@ class Main(QMainWindow):
                     for i in question_numbers:
                         mark = 0 # Initialize the mark that a student gets on a question as 0
                         for entry in os.scandir(self.extracted_dir):
-                            if "A{0}_{1}.py".format(solMod.assignment_num, i) in entry.path:
+                            if "A{0}_{1}{2}.py".format(solMod.assignment_num, i, safe_student_name) in entry.path:
                                 marked_questions.append(i)
                                 
-                                ### Here's where we append the student name to the file name so that each imported script is unique (to avoid builtin function
-                                print(entry.path)
                                 if type(solMod.Q_all[i-1]) is dict:
                                     inputs = list(solMod.Q_all[i-1].keys())
                                     outputs = list(solMod.Q_all[i-1].values())
                                     #call method
                                     mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible) 
+                                    #mark = self.question(i, new_entry, entry_dir, new_entry_tail, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible) 
                                 else:
                                     inputs = []
                                     outputs = [solMod.Q_all[i-1]]
                                     #call method
-                                    mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible)
+                                    mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible) 
+                                    # mark = self.question(i, new_entry, entry_dir, new_entry_tail, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible)
                                 break
                                 
                         self.grade += mark
@@ -335,7 +350,11 @@ class Main(QMainWindow):
                         student_name = file_name.replace(keyword,'')
                     else:
                         student_name = file_name[:file_name.find('_')]
-
+                    
+                    #We make a version of student_name without "-" or ", ", so that the file name is safe when we import them as modules.
+                    safe_student_name = student_name.replace(", ", "")
+                    safe_student_name = safe_student_name.replace("-", "")
+                    
                     # Initialize the output text file.
                     # Define the output text file for this student
                     self.output_dir = Path(self.CS20button3_dir, "Output_Summaries")
@@ -351,6 +370,18 @@ class Main(QMainWindow):
                     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
                         zip_ref.extractall(self.extracted_dir)
                     
+                    ### Change name of each A#_# to be A#_#NAME so that each module is unique.
+                    for entry in os.scandir(self.extracted_dir):
+                        ### Here's where we append the student name to the file name so that each imported script is unique (to avoid builtin function overwrite errors)
+                        old_entry = Path(entry.path) # Full path to .py file as a string.
+                        entry_dir = old_entry.parent # C:\Users\USERNAME\some_directories\Temp_Extracted
+                        old_entry_tail = old_entry.stem # A#_#
+                        entry_ext = old_entry.suffix # .py extension
+                        new_entry = "{}\{}{}{}".format(entry_dir, old_entry_tail, safe_student_name, entry_ext) #Full_dir\Temp_Extracted\A#_#NAME.py
+                        new_entry = Path(new_entry)
+                        new_entry_tail = new_entry.stem # A#_#NAME
+                        os.rename(old_entry, new_entry) #rename the current .py file
+                    
                     # Running grade total
                     self.grade = 0
                     NHI = False
@@ -362,8 +393,9 @@ class Main(QMainWindow):
                     for i in question_numbers:
                         mark = 0 # Initialize the mark that a student gets on a question as 0
                         for entry in os.scandir(self.extracted_dir):
-                            if "A{0}_{1}.py".format(solMod.assignment_num, i) in entry.path:
+                            if "A{0}_{1}{2}.py".format(solMod.assignment_num, i, safe_student_name) in entry.path:
                                 marked_questions.append(i)
+                                
                                 if type(solMod.Q_all[i-1]) is dict:
                                     inputs = list(solMod.Q_all[i-1].keys())
                                     outputs = list(solMod.Q_all[i-1].values())
@@ -479,11 +511,15 @@ class Main(QMainWindow):
         doc = Path(self.main_dir, "PyAutoMark_Documentation.pdf")
         os.startfile(doc)
         
+    #def question(self, Q_num, file, head, trim_tail, inp, outp, outfile, weight, flexible):
     def question(self, Q_num, file, inp, outp, outfile, weight, flexible):
-        # Note: The outfile is opened in append mode; all console output is also written outfile.
+        # Note: The outfile is opened in append mode; all console output is also written to the outfile.
         head, tail = os.path.split(file.path) #store the sol dir and the sol file in separate local variables
         trim_tail = os.path.splitext(tail)[0]
         sys.path.insert(1, head)
+        
+        print(head)
+        print(trim_tail)
         
         # This is broken into two main types of solutions: (1) No user input is expected; (2) User input is expected.
         # Recall: 'inp' contains the user input from the solution key. 
