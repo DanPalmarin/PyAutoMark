@@ -2,9 +2,24 @@
 
 
 BUG
-- Reset button closes program.
+- Open PyAutoMark
+- Check CS20
+- Select A7 key
+- Select Moodle zip (A7)
+- Run program
+- Select A6 key
+- Select Moodle zip (A6)
+- Run program
+- Grades are blank on all except Aden (10) and Carter (10)
 
-- Clear and running program again seems to yield some blanks in the grades (try CS30 A8 to A9 or between A9 and A10).
+
+
+
+
+
+
+
+- Clear and running program again seems to yield some blanks in the grades (try CS30 A8 to A9 or between A9 and A10). (POSSIBLY FIXED)
 
 - If the key question input is something like:
 Q3 = ("L2: 1 item", "L3: 5 items")

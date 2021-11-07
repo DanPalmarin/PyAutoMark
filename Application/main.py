@@ -518,9 +518,6 @@ class Main(QMainWindow):
         trim_tail = os.path.splitext(tail)[0]
         sys.path.insert(1, head)
         
-        print(head)
-        print(trim_tail)
-        
         # This is broken into two main types of solutions: (1) No user input is expected; (2) User input is expected.
         # Recall: 'inp' contains the user input from the solution key. 
         if inp == []:
