@@ -3,8 +3,6 @@ import os
 import shutil
 import json
 import zipfile
-import threading
-import _thread
 from pathlib import Path
 from contextlib import contextmanager, redirect_stdout
 from io import StringIO
@@ -12,7 +10,6 @@ from importlib import import_module, reload
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui     import *
 from PyQt5.QtCore    import *
-from PyQt5.sip import assign
 from main_window import Ui_MainWindow
 #from moodle_window import Ui_MoodleWindow
 
@@ -53,16 +50,14 @@ class Main(QMainWindow):
         self.ui.actionReset.triggered.connect(self.reset_handler)
         self.ui.actionDocumentation_PDF.triggered.connect(self.doc_handler)
         
-        # Define radio button functionality (Class Selection)
+        # Define radio button functionality
         self.ui.radioButton1.toggled.connect(self.radioButton_handler)
         self.ui.radioButton2.toggled.connect(self.radioButton_handler)
         
         # Defining button functionality
-        ## File Selection
         self.ui.button1.clicked.connect(self.button1_handler)
         self.ui.button2.clicked.connect(self.button2_handler)
         self.ui.button3.clicked.connect(self.button3_handler)
-        ## Program Execution
         self.ui.button4.clicked.connect(self.button4_handler)
         #self.ui.button5.clicked.connect(self.button5_handler)
         self.ui.button6.clicked.connect(self.button6_handler)
@@ -74,8 +69,7 @@ class Main(QMainWindow):
         self.ui.button1.setEnabled(True)
         self.ui.button2.setEnabled(True)
         self.ui.button3.setEnabled(True)
-    
-    # Select answer key
+
     def button1_handler(self):
         if self.ui.radioButton1.isChecked():
             filename = QFileDialog.getOpenFileName(None, "Select a solution key (.py).", self.CS20button1_dir, "Python file (*.py)")
@@ -109,8 +103,7 @@ class Main(QMainWindow):
             self.ui.button4.setEnabled(True)
         else:
             self.ui.button4.setEnabled(False)
-    
-    # Select Moodle zip
+            
     def button2_handler(self):
         if self.ui.radioButton1.isChecked():
             self.moodle_zip = QFileDialog.getOpenFileName(None, "Select a single Moodle zip file (.zip).", self.CS20button2_dir, "Zip file (*.zip)")[0] #returns as tuple: (path, type)
@@ -154,7 +147,6 @@ class Main(QMainWindow):
         else:
             self.ui.button4.setEnabled(False)
         
-    # Select assignments
     def button3_handler(self):
         if self.ui.radioButton1.isChecked():
             filename = QFileDialog.getOpenFileNames(None, "Select any number of student assignments (.zip).", self.CS20button3_dir, "Zip file(s) (*.zip)")
@@ -189,7 +181,6 @@ class Main(QMainWindow):
         else:
             self.ui.button4.setEnabled(False)
         
-    # Run programs
     def button4_handler(self):
         # Obtain needed paths and import the solution key 
         head, tail = os.path.split(self.button1_file) #store the sol dir and the sol file in separate local variables
@@ -253,18 +244,10 @@ class Main(QMainWindow):
                     self.output_file = Path(self.output_dir, "{0}{1}".format(file_name,".txt"))
                     with open(self.output_file, 'w') as f:
                         f.write("Assignment {0}\n\n".format(solMod.assignment_num))
-                    
-                    lastdir = os.getcwd()
-                    # Extract zipped assignment submission while checking for if it is zipped incorrectly
+                          
+                    # Extract zipped assignment submission
                     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
                         zip_ref.extractall(self.extracted_dir)
-                        os.chdir(self.extracted_dir)
-                        for f in os.listdir(self.extracted_dir):
-                            if(os.path.isdir(f)):
-                                os.chdir(f)
-                                for file in os.listdir():
-                                    shutil.copy(file,self.extracted_dir)
-                    os.chdir(lastdir)
                     
                     ### Change name of each A#_# to be A#_#NAME so that each module is unique.
                     for entry in os.scandir(self.extracted_dir):
@@ -382,18 +365,10 @@ class Main(QMainWindow):
                     self.output_file = Path(self.output_dir, "{0}{1}".format(file_name,".txt"))
                     with open(self.output_file, 'w') as f:
                         f.write("Assignment {0}\n\n".format(solMod.assignment_num))
-
-                    lastdir = os.getcwd()
-                    # Extract zipped assignment submission while checking for if it is zipped incorrectly
+                          
+                    # Extract zipped assignment submission
                     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
                         zip_ref.extractall(self.extracted_dir)
-                        os.chdir(self.extracted_dir)
-                        for f in os.listdir(self.extracted_dir):
-                            if(os.path.isdir(f)):
-                                os.chdir(f)
-                                for file in os.listdir():
-                                    shutil.copy(file,self.extracted_dir)
-                    os.chdir(lastdir)
                     
                     ### Change name of each A#_# to be A#_#NAME so that each module is unique.
                     for entry in os.scandir(self.extracted_dir):
@@ -471,7 +446,6 @@ class Main(QMainWindow):
             
             self.ui.button6.setEnabled(True)
 
-    # Output Directory
     def button6_handler(self):
         os.startfile(self.output_dir) # Windows only; this lauches the folder that contains the output .txt files (in explorer)
    
@@ -620,6 +594,7 @@ class Main(QMainWindow):
                     result = self.running_assignments(trim_tail, formatted_input)
                 else:
                     result = self.running_assignments(trim_tail, str(inp[i]))
+                
                 # For printing out to text files
                 print_out = formatted_output.replace("\n", "   ")
                 print_res = str(result).replace("\n", "   ")
@@ -687,42 +662,25 @@ class Main(QMainWindow):
                         f.write(line)
                 return 0
 
-    # Code derived from https://www.generacodice.com/en/articolo/170539/how-to-limit-execution-time-of-a-function-call-in-python
-    @contextmanager
-    def time_limit(self, seconds):
-        # Start a timer
-        timer = threading.Timer(seconds, lambda: _thread.interrupt_main())
-        timer.start()
-        try:
-            yield
-        except KeyboardInterrupt:
-            raise TimeoutError("Timeout")
-        finally:
-            # if the action ends in specified time, timer is canceled
-            timer.cancel()
-
-    def run(self, assignment, input_feed):
+    def running_assignments(self, assignment, input_feed):
         output_feed = StringIO()
         with redirect_stdout(output_feed):
             with self.replace_stdin(StringIO(input_feed)):
                 if assignment not in self.modules:
-                    varMod = import_module(assignment)
-                    self.modules.append(assignment)
-                    res = output_feed.getvalue().rstrip()
+                    try:
+                        varMod = import_module(assignment)
+                        self.modules.append(assignment)
+                        res = output_feed.getvalue().rstrip()
+                    except Exception as err:
+                        res = "Error: {0}".format(err)
                 else:
-                    varMod = import_module(assignment)
-                    varMod = reload(varMod)
-                    res = output_feed.getvalue().rstrip()
-        return res
+                    try:
+                        varMod = import_module(assignment)
+                        varMod = reload(varMod)
+                        res = output_feed.getvalue().rstrip()
+                    except Exception as err:
+                        res = "Error: {0}".format(err)
         
-    def running_assignments(self, assignment, input_feed):
-        try:
-            with self.time_limit(1):
-                res = self.run(assignment,input_feed)
-        except TimeoutError:
-            res = "Error: Program exceeded time limit. Possible infinite loop."
-        except Exception as err:
-            res = "Error: {0}".format(err)
         return res
         
     def in_out_with_newlines(self, some_tuple):
