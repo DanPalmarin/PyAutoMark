@@ -1,0 +1,45 @@
+
+
+
+BUG
+- Open PyAutoMark
+- Check CS20
+- Select A7 key
+- Select Moodle zip (A7)
+- Run program
+- Select A6 key
+- Select Moodle zip (A6)
+- Run program
+- Grades are blank on all except Aden (10) and Carter (10)
+
+
+
+
+
+
+
+
+- Clear and running program again seems to yield some blanks in the grades (try CS30 A8 to A9 or between A9 and A10). (POSSIBLY FIXED)
+
+- If the key question input is something like:
+Q3 = ("L2: 1 item", "L3: 5 items")
+then it doesn't match student work. But
+Q3 = "L2: 1 item\nL3: 5 items"
+works just fine.
+
+Done:
+
+- Increase names table column width
+- Alphabetize names from last names
+- Automatically generate 'ANUM_Feedback.zip'
+- Before doing the above two points, make two radio buttons (CS20 and CS30). The config file will update according which is selected.
+- Merge Moodle interface into the main window
+- Make the 'submissions' folder directory to default to the location of the Moodle zip
+- Reorganize all solution keys to be in same folder (one for CS30 and one for CS20)
+- Reorganize all students submissions to be in the same folder (one for CS30 and one for CS20)
+- Make moodle extraction overwrite previous files of the same name
+
+
+
+
+
