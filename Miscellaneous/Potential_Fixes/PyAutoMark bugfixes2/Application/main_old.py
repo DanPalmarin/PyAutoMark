@@ -3,20 +3,17 @@ import os
 import shutil
 import json
 import zipfile
-import threading
-import _thread
 from pathlib import Path
 from contextlib import contextmanager, redirect_stdout
 from io import StringIO
 from importlib import import_module, reload
-# import PyQt5
-# from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui     import *
 from PyQt5.QtCore    import *
-from PyQt5.sip import assign
+
 from main_window import Ui_MainWindow
-#from moodle_window import Ui_MoodleWindow
+from moodle_window import Ui_MoodleWindow
+
 
 class Main(QMainWindow):
     def __init__(self):
@@ -34,11 +31,9 @@ class Main(QMainWindow):
         self.ui.setupUi(self)
         
         # Read in config settings from config.json
-        try:
-            with open(Path(self.main_dir, 'config.json'), 'r') as f:
-                self.config = json.load(f)
-        except:
-            self.config_initialize()
+        with open(Path(self.main_dir, 'config.json'), 'r') as f:
+            self.config = json.load(f)
+            
         # Define key variables
         self.CS20button1_dir = self.config['CS20default_dir1']
         self.CS20button2_dir = self.config['CS20default_dir2']
@@ -57,16 +52,14 @@ class Main(QMainWindow):
         self.ui.actionReset.triggered.connect(self.reset_handler)
         self.ui.actionDocumentation_PDF.triggered.connect(self.doc_handler)
         
-        # Define radio button functionality (Class Selection)
+        # Define radio button functionality
         self.ui.radioButton1.toggled.connect(self.radioButton_handler)
         self.ui.radioButton2.toggled.connect(self.radioButton_handler)
         
         # Defining button functionality
-        ## File Selection
         self.ui.button1.clicked.connect(self.button1_handler)
         self.ui.button2.clicked.connect(self.button2_handler)
         self.ui.button3.clicked.connect(self.button3_handler)
-        ## Program Execution
         self.ui.button4.clicked.connect(self.button4_handler)
         #self.ui.button5.clicked.connect(self.button5_handler)
         self.ui.button6.clicked.connect(self.button6_handler)
@@ -78,8 +71,7 @@ class Main(QMainWindow):
         self.ui.button1.setEnabled(True)
         self.ui.button2.setEnabled(True)
         self.ui.button3.setEnabled(True)
-    
-    # Select answer key
+
     def button1_handler(self):
         if self.ui.radioButton1.isChecked():
             filename = QFileDialog.getOpenFileName(None, "Select a solution key (.py).", self.CS20button1_dir, "Python file (*.py)")
@@ -113,8 +105,7 @@ class Main(QMainWindow):
             self.ui.button4.setEnabled(True)
         else:
             self.ui.button4.setEnabled(False)
-    
-    # Select Moodle zip
+            
     def button2_handler(self):
         if self.ui.radioButton1.isChecked():
             self.moodle_zip = QFileDialog.getOpenFileName(None, "Select a single Moodle zip file (.zip).", self.CS20button2_dir, "Zip file (*.zip)")[0] #returns as tuple: (path, type)
@@ -158,7 +149,6 @@ class Main(QMainWindow):
         else:
             self.ui.button4.setEnabled(False)
         
-    # Select assignments
     def button3_handler(self):
         if self.ui.radioButton1.isChecked():
             filename = QFileDialog.getOpenFileNames(None, "Select any number of student assignments (.zip).", self.CS20button3_dir, "Zip file(s) (*.zip)")
@@ -193,7 +183,6 @@ class Main(QMainWindow):
         else:
             self.ui.button4.setEnabled(False)
         
-    # Run programs
     def button4_handler(self):
         # Obtain needed paths and import the solution key 
         head, tail = os.path.split(self.button1_file) #store the sol dir and the sol file in separate local variables
@@ -201,40 +190,61 @@ class Main(QMainWindow):
         sys.path.insert(1, head) # places the desired dir in the correct place for import_module below
         solMod = import_module(trim_tail) # variables defined in trim_tail should be referenced as: solMod.variable
         
-        # Turn off sorting to avoid conflicts
-        self.ui.table1.setSortingEnabled(False)
-
         # If Moodle zip was used, we extract the files to the "Student_Submissions" folder contained in the directory with the Moodle zip.
         # We then loop through each zipped submission.
         # If "Assignments" button was used, we loop through each zip file in self.button3_list.
         
         if self.button2_bool == True:
+            # Initialize the error_log list
+            self.error_log_list = []
+              
             # Checks if Student_Submissions folder exists - if not, it creates it in the directory that contains the Moodle zip
             zipped_submissions = Path(self.moodle_dir, "Student_Submissions")
             Path(zipped_submissions).mkdir(parents=True, exist_ok=True)
-
+            
+            # Initialize the output text file.
+            # Define the output text file for this student
+            self.output_dir = Path(zipped_submissions, "Output_Summaries")
+            Path(self.output_dir).mkdir(parents=True, exist_ok=True) #checks if output_dir exists - if not, it creates it
+            
             # Extract the zipped Moodle file to self.new_moodle_dir
             with zipfile.ZipFile(self.moodle_zip_file, 'r') as zip_ref:
                 zip_ref.extractall(self.new_moodle_dir)
-
-            # Iterate over each folder in "Student_Submissions"
-            # moodle_zips_list will hold on to each student zipped submission (still zipped) with a newly formatted name.
+            
+            # We iterate over each folder in "Student_Submissions".
             moodle_zips_list = []
             for entry in os.scandir(self.new_moodle_dir):
                 # We prep future file for a single feedback file zip (following Moodle's formatting).
                 # We need the name of each folder to be the name of each corresponding zip file inside each folder.
                 full_moodle_name = entry.name
-                for A_name_zip in Path(entry).iterdir(): # There should only be 1 zip file here
+                
+                ### OLD (WORKING) CODE ###
+                # for A_name_zip in Path(entry).iterdir(): # There will only be 1 zip file here. This is guaranteed by the Moodle zip process.
+                    # extension = os.path.splitext(A_name_zip)[1]
+                    # new_name = Path(full_moodle_name + extension)
+                    # shutil.move(A_name_zip, zipped_submissions.joinpath(new_name)) # Moves each file to "Student_Submissions" folder and replaces files if they already exist.
+                    # moodle_zips_list.append(str(Path(A_name_zip, zipped_submissions, new_name))) # Add new zipped file locations to a list to be iterated over later.
+                
+                for A_name_zip in Path(entry).iterdir(): # There will only be 1 zip file here. This is guaranteed by the Moodle zip process.
+                    # Check that A_name_zip is in a reasonably good format before adding it to the moodle_zips_list.
+                    # It must contain at least one .py file that isn't part of any parent subdirectory; i.e. "somedir/A1_1.py" - this is bad.
+                    with zipfile.ZipFile(A_name_zip, 'r') as zip_obj:
+                        list_of_files = zip_obj.namelist()
+                    
                     extension = os.path.splitext(A_name_zip)[1]
                     new_name = Path(full_moodle_name + extension)
-                    shutil.move(A_name_zip, zipped_submissions.joinpath(new_name)) # Moves each file to "Student_Submissions" folder and replaces files if they already exist.
-                    moodle_zips_list.append(str(Path(A_name_zip, zipped_submissions, new_name))) # Add new zipped file locations to a list to be iterated over later.
+                    if any(Path(fname).suffix == '.py' and fname.find('/') == -1 for fname in list_of_files):
+                        shutil.move(A_name_zip, zipped_submissions.joinpath(new_name)) # Moves each file to "Student_Submissions" folder and replaces files if they already exist.
+                        moodle_zips_list.append(str(Path(A_name_zip, zipped_submissions, new_name))) # Add new zipped file locations to a list to be iterated over later.
+                    else:
+                        self.error_log_list.append(str(Path(A_name_zip, zipped_submissions, new_name)))
             
             # Delete the self.new_moodle_dir and all of its contents
             if Path(self.new_moodle_dir).is_dir():
                 shutil.rmtree(self.new_moodle_dir)
             
             # We loop through each zip file in "Student_Submissions" and mark it.
+            
             self.extracted_dir = Path(zipped_submissions, "Temp_Extracted")
             for zip_file in moodle_zips_list:
                 # we continue to the next zip_file if the current one is in 'checked'
@@ -247,43 +257,19 @@ class Main(QMainWindow):
                     student_name = student_name.split()
                     student_name = "{}, {}".format(student_name[1], student_name[0])
                     
-                    #We make a version of student_name without "-" or ", ", so that the file name is safe when we import them as modules.
-                    safe_student_name = student_name.replace(", ", "")
-                    safe_student_name = safe_student_name.replace("-", "")
-                    
                     # Initialize the output text file.
                     # Define the output text file for this student
-                    self.output_dir = Path(zipped_submissions, "Output_Summaries")
-                    Path(self.output_dir).mkdir(parents=True, exist_ok=True) #checks if output_dir exists - if not, it creates it
+                    # self.output_dir = Path(zipped_submissions, "Output_Summaries")
+                    # Path(self.output_dir).mkdir(parents=True, exist_ok=True) #checks if output_dir exists - if not, it creates it
                     
                     # If the zip_file is from a bulk moodle download, the name must be file_name for easy feedback dump.
                     self.output_file = Path(self.output_dir, "{0}{1}".format(file_name,".txt"))
                     with open(self.output_file, 'w') as f:
                         f.write("Assignment {0}\n\n".format(solMod.assignment_num))
-                    
-                    lastdir = os.getcwd()
-                    # Extract zipped assignment submission while checking for if it is zipped incorrectly
+                          
+                    # Extract zipped assignment submission
                     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
                         zip_ref.extractall(self.extracted_dir)
-                        os.chdir(self.extracted_dir)
-                        for f in os.listdir(self.extracted_dir):
-                            if(os.path.isdir(f)):
-                                os.chdir(f)
-                                for file in os.listdir():
-                                    shutil.copy(file,self.extracted_dir)
-                    os.chdir(lastdir)
-                    
-                    ### Change name of each A#_# to be A#_#NAME so that each module is unique.
-                    for entry in os.scandir(self.extracted_dir):
-                        ### Here's where we append the student name to the file name so that each imported script is unique (to avoid builtin function overwrite errors)
-                        old_entry = Path(entry.path) # Full path to .py file as a string.
-                        entry_dir = old_entry.parent # C:\Users\USERNAME\some_directories\Temp_Extracted
-                        old_entry_tail = old_entry.stem # A#_#
-                        entry_ext = old_entry.suffix # .py extension
-                        new_entry = "{}\{}{}{}".format(entry_dir, old_entry_tail, safe_student_name, entry_ext) #Full_dir\Temp_Extracted\A#_#NAME.py
-                        new_entry = Path(new_entry)
-                        new_entry_tail = new_entry.stem # A#_#NAME
-                        os.rename(old_entry, new_entry) #rename the current .py file
                     
                     # Running grade total
                     self.grade = 0
@@ -296,21 +282,18 @@ class Main(QMainWindow):
                     for i in question_numbers:
                         mark = 0 # Initialize the mark that a student gets on a question as 0
                         for entry in os.scandir(self.extracted_dir):
-                            if "A{0}_{1}{2}.py".format(solMod.assignment_num, i, safe_student_name) in entry.path:
+                            if "A{0}_{1}.py".format(solMod.assignment_num, i) in entry.path:
                                 marked_questions.append(i)
-                                
                                 if type(solMod.Q_all[i-1]) is dict:
                                     inputs = list(solMod.Q_all[i-1].keys())
                                     outputs = list(solMod.Q_all[i-1].values())
                                     #call method
                                     mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible) 
-                                    #mark = self.question(i, new_entry, entry_dir, new_entry_tail, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible) 
                                 else:
                                     inputs = []
                                     outputs = [solMod.Q_all[i-1]]
                                     #call method
-                                    mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible) 
-                                    # mark = self.question(i, new_entry, entry_dir, new_entry_tail, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible)
+                                    mark = self.question(i, entry, inputs, outputs, self.output_file, solMod.Q_weight, solMod.Q_flexible)
                                 break
                                 
                         self.grade += mark
@@ -337,7 +320,7 @@ class Main(QMainWindow):
                     
                     item.setTextAlignment(Qt.AlignCenter)
                     self.ui.table1.setItem(rowPosition,1, item)
-
+                    
                     # Populate the list with the name of the output text file
                     self.ui.list1.addItem(QListWidgetItem("{0}.txt".format(file_name)))
                     #self.ui.list1.addItem(QListWidgetItem("{0}{1}.txt".format(word1, student_name)))
@@ -349,7 +332,31 @@ class Main(QMainWindow):
                     if Path(self.extracted_dir).is_dir():
                         shutil.rmtree(self.extracted_dir) # delete the 'Temp_Extracted' directory and all of its contents
                     
-            
+            #If the error_log_list isn't empty, we write it's contents to a text file.
+            if len(self.error_log_list) != 0:
+                for file_name in self.error_log_list:
+                    file_name = file_name[:file_name.rfind('\\')+1] + "Output_Summaries\\" + file_name[file_name.rfind('\\'):file_name.rfind('.')]
+                    file_name = Path(file_name)
+                    self.output_file = Path(self.output_dir, "{0}{1}".format(file_name,".txt"))
+                    with open(self.output_file, 'w') as f:
+                        f.write("ERROR - bad format. Please make sure that you formatted your zip file correctly. Ask for assistance if needed. Please resubmit your assignment with a correctly formatted zip file.")
+                    
+                    # If the error_log_list isn't empty, we update the table with its contents.
+                    #When the moodle zip is selected, it's nice to report the student names as "last, first", to match Aspen.
+                    file_name = file_name.stem
+                    student_name = file_name[:file_name.find('_')]
+                    student_name = student_name.split()
+                    student_name = "{}, {}".format(student_name[1], student_name[0])
+                    rowPosition = self.ui.table1.rowCount()
+                    self.ui.table1.insertRow(rowPosition)
+                    self.ui.table1.setItem(rowPosition,0, QTableWidgetItem(student_name))
+                    item = QTableWidgetItem("BAD FORMAT")
+                    item.setTextAlignment(Qt.AlignCenter)
+                    self.ui.table1.setItem(rowPosition,1, item)
+                    
+                    # Populate the list with the name of the output text file
+                    self.ui.list1.addItem(QListWidgetItem("{0}.txt".format(file_name)))
+                    
             # Add each feedback text file to feedback_zip.
             feedback_zip = zipfile.ZipFile(Path(self.output_dir, "Feedback_Files.zip"), 'w')
             for feedback_file in os.listdir(self.output_dir):
@@ -358,7 +365,6 @@ class Main(QMainWindow):
             feedback_zip.close()
             
             self.ui.button6.setEnabled(True)
-            self.ui.table1.setSortingEnabled(True)
             
         elif self.button3_bool == True:
             # Loop through each zip file in self.button3_list
@@ -376,9 +382,13 @@ class Main(QMainWindow):
                     else:
                         student_name = file_name[:file_name.find('_')]
                     
-                    #We make a version of student_name without "-" or ", ", so that the file name is safe when we import them as modules.
-                    safe_student_name = student_name.replace(", ", "")
-                    safe_student_name = safe_student_name.replace("-", "")
+                    # # Next, we check that the zip file is in the correct format.
+                    # with zipfile.ZipFile(zip_file, 'r') as zip_obj:
+                        # list_of_files = zip_obj.namelist()
+                    
+                    # if not any(Path(fname).suffix == '.py' and fname.find('/') == -1 for fname in list_of_files):
+                        # self.error_log_list.append(student_name)
+                        # continue
                     
                     # Initialize the output text file.
                     # Define the output text file for this student
@@ -390,30 +400,10 @@ class Main(QMainWindow):
                     self.output_file = Path(self.output_dir, "{0}{1}".format(file_name,".txt"))
                     with open(self.output_file, 'w') as f:
                         f.write("Assignment {0}\n\n".format(solMod.assignment_num))
-
-                    lastdir = os.getcwd()
-                    # Extract zipped assignment submission while checking for if it is zipped incorrectly
+                          
+                    # Extract zipped assignment submission
                     with zipfile.ZipFile(zip_file, 'r') as zip_ref:
                         zip_ref.extractall(self.extracted_dir)
-                        os.chdir(self.extracted_dir)
-                        for f in os.listdir(self.extracted_dir):
-                            if(os.path.isdir(f)):
-                                os.chdir(f)
-                                for file in os.listdir():
-                                    shutil.copy(file,self.extracted_dir)
-                    os.chdir(lastdir)
-                    
-                    ### Change name of each A#_# to be A#_#NAME so that each module is unique.
-                    for entry in os.scandir(self.extracted_dir):
-                        ### Here's where we append the student name to the file name so that each imported script is unique (to avoid builtin function overwrite errors)
-                        old_entry = Path(entry.path) # Full path to .py file as a string.
-                        entry_dir = old_entry.parent # C:\Users\USERNAME\some_directories\Temp_Extracted
-                        old_entry_tail = old_entry.stem # A#_#
-                        entry_ext = old_entry.suffix # .py extension
-                        new_entry = "{}\{}{}{}".format(entry_dir, old_entry_tail, safe_student_name, entry_ext) #Full_dir\Temp_Extracted\A#_#NAME.py
-                        new_entry = Path(new_entry)
-                        new_entry_tail = new_entry.stem # A#_#NAME
-                        os.rename(old_entry, new_entry) #rename the current .py file
                     
                     # Running grade total
                     self.grade = 0
@@ -426,9 +416,8 @@ class Main(QMainWindow):
                     for i in question_numbers:
                         mark = 0 # Initialize the mark that a student gets on a question as 0
                         for entry in os.scandir(self.extracted_dir):
-                            if "A{0}_{1}{2}.py".format(solMod.assignment_num, i, safe_student_name) in entry.path:
+                            if "A{0}_{1}.py".format(solMod.assignment_num, i) in entry.path:
                                 marked_questions.append(i)
-                                
                                 if type(solMod.Q_all[i-1]) is dict:
                                     inputs = list(solMod.Q_all[i-1].keys())
                                     outputs = list(solMod.Q_all[i-1].values())
@@ -476,10 +465,8 @@ class Main(QMainWindow):
                     # Detete the 'Temp_Extracted' directory and all of its contents
                     if Path(self.extracted_dir).is_dir():
                         shutil.rmtree(self.extracted_dir) # detete the 'Temp_Extracted' directory and all of its contents
-            
             self.ui.button6.setEnabled(True)
 
-    # Output Directory
     def button6_handler(self):
         os.startfile(self.output_dir) # Windows only; this lauches the folder that contains the output .txt files (in explorer)
    
@@ -501,6 +488,7 @@ class Main(QMainWindow):
         item.setText("Grade")
         self.ui.list1.clear()
         self.checked = []
+        self.error_log_list = []
         self.config_initialize()
         
         # Read in config settings from config.json
@@ -525,7 +513,7 @@ class Main(QMainWindow):
         self.ui.button2_bool = False
         self.ui.button3_bool = False
         self.ui.button4.setEnabled(False)
-        # self.ui.button5.setEnabled(False)
+        self.ui.button5.setEnabled(False)
         self.ui.button6.setEnabled(False)
         
     def config_initialize(self):
@@ -540,15 +528,13 @@ class Main(QMainWindow):
         } 
         with open(Path(self.main_dir, 'config.json'), 'w') as f:
             json.dump(config, f)
-        self.config = config
     
     def doc_handler(self):
         doc = Path(self.main_dir, "PyAutoMark_Documentation.pdf")
         os.startfile(doc)
         
-    #def question(self, Q_num, file, head, trim_tail, inp, outp, outfile, weight, flexible):
     def question(self, Q_num, file, inp, outp, outfile, weight, flexible):
-        # Note: The outfile is opened in append mode; all console output is also written to the outfile.
+        # Note: The outfile is opened in append mode; all console output is also written outfile.
         head, tail = os.path.split(file.path) #store the sol dir and the sol file in separate local variables
         trim_tail = os.path.splitext(tail)[0]
         sys.path.insert(1, head)
@@ -629,6 +615,7 @@ class Main(QMainWindow):
                     result = self.running_assignments(trim_tail, formatted_input)
                 else:
                     result = self.running_assignments(trim_tail, str(inp[i]))
+                
                 # For printing out to text files
                 print_out = formatted_output.replace("\n", "   ")
                 print_res = str(result).replace("\n", "   ")
@@ -696,43 +683,26 @@ class Main(QMainWindow):
                         f.write(line)
                 return 0
 
-    # Code derived from https://www.generacodice.com/en/articolo/170539/how-to-limit-execution-time-of-a-function-call-in-python
-    @contextmanager
-    def time_limit(self, seconds):
-        # Start a timer
-        timer = threading.Timer(seconds, lambda: _thread.interrupt_main())
-        timer.start()
-        try:
-            yield
-        except KeyboardInterrupt:
-            raise TimeoutError("Timeout")
-        finally:
-            # if the action ends in specified time, timer is canceled
-            timer.cancel()
-
-    def run(self, assignment, input_feed):
+    def running_assignments(self, assignment, input_feed):
         output_feed = StringIO()
         with redirect_stdout(output_feed):
             with self.replace_stdin(StringIO(input_feed)):
                 if assignment not in self.modules:
-                    varMod = import_module(assignment)
-                    self.modules.append(assignment)
-                    res = output_feed.getvalue().rstrip()
+                    try:
+                        varMod = import_module(assignment)
+                        self.modules.append(assignment)
+                        res = output_feed.getvalue().rstrip()
+                    except Exception as err:
+                        res = "Error: {0}".format(err)
                 else:
-                    varMod = import_module(assignment)
-                    varMod = reload(varMod)
-                    res = output_feed.getvalue().rstrip()
+                    try:
+                        varMod = import_module(assignment)
+                        varMod = reload(varMod)
+                        res = output_feed.getvalue().rstrip()
+                    except Exception as err:
+                        res = "Error: {0}".format(err)
         return res
-    def running_assignments(self, assignment, input_feed):
-        try:
-            with self.time_limit(1):
-                res = self.run(assignment,input_feed)
-        except TimeoutError:
-            res = "Error: Program exceeded time limit. Possible infinite loop."
-        except Exception as err:
-            res = "Error: {0}".format(err)
-        return res
-        
+    
     def in_out_with_newlines(self, some_tuple):
         new_string = ""
         for x in some_tuple:
@@ -752,19 +722,24 @@ class Main(QMainWindow):
 
 
 if __name__ == '__main__':
-    #import os
-    #os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
-    
-    # # Handle high resolution displays:
-    # if hasattr(Qt, 'AA_EnableHighDpiScaling'):
-        # QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
-    
-    # if hasattr(Qt, 'AA_UseHighDpiPixmaps'):
-        # QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
-        
     app = QApplication(sys.argv)
-    #app.setStyle("Windowsvista")
-    app.setStyle("Fusion")
     w = Main()
     w.show()
     sys.exit(app.exec_())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

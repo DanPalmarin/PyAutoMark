@@ -9,8 +9,8 @@ from pathlib import Path
 from contextlib import contextmanager, redirect_stdout
 from io import StringIO
 from importlib import import_module, reload
-# import PyQt5
-# from PyQt5 import QtCore
+import PyQt5
+from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui     import *
 from PyQt5.QtCore    import *
@@ -728,7 +728,7 @@ class Main(QMainWindow):
             with self.time_limit(1):
                 res = self.run(assignment,input_feed)
         except TimeoutError:
-            res = "Error: Program exceeded time limit. Possible infinite loop."
+            res = "Error: Program exceeded time limit"
         except Exception as err:
             res = "Error: {0}".format(err)
         return res

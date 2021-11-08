@@ -9,8 +9,6 @@ from pathlib import Path
 from contextlib import contextmanager, redirect_stdout
 from io import StringIO
 from importlib import import_module, reload
-# import PyQt5
-# from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui     import *
 from PyQt5.QtCore    import *
@@ -34,11 +32,9 @@ class Main(QMainWindow):
         self.ui.setupUi(self)
         
         # Read in config settings from config.json
-        try:
-            with open(Path(self.main_dir, 'config.json'), 'r') as f:
-                self.config = json.load(f)
-        except:
-            self.config_initialize()
+        with open(Path(self.main_dir, 'config.json'), 'r') as f:
+            self.config = json.load(f)
+            
         # Define key variables
         self.CS20button1_dir = self.config['CS20default_dir1']
         self.CS20button2_dir = self.config['CS20default_dir2']
@@ -201,9 +197,6 @@ class Main(QMainWindow):
         sys.path.insert(1, head) # places the desired dir in the correct place for import_module below
         solMod = import_module(trim_tail) # variables defined in trim_tail should be referenced as: solMod.variable
         
-        # Turn off sorting to avoid conflicts
-        self.ui.table1.setSortingEnabled(False)
-
         # If Moodle zip was used, we extract the files to the "Student_Submissions" folder contained in the directory with the Moodle zip.
         # We then loop through each zipped submission.
         # If "Assignments" button was used, we loop through each zip file in self.button3_list.
@@ -337,7 +330,7 @@ class Main(QMainWindow):
                     
                     item.setTextAlignment(Qt.AlignCenter)
                     self.ui.table1.setItem(rowPosition,1, item)
-
+                    
                     # Populate the list with the name of the output text file
                     self.ui.list1.addItem(QListWidgetItem("{0}.txt".format(file_name)))
                     #self.ui.list1.addItem(QListWidgetItem("{0}{1}.txt".format(word1, student_name)))
@@ -358,7 +351,6 @@ class Main(QMainWindow):
             feedback_zip.close()
             
             self.ui.button6.setEnabled(True)
-            self.ui.table1.setSortingEnabled(True)
             
         elif self.button3_bool == True:
             # Loop through each zip file in self.button3_list
@@ -540,7 +532,6 @@ class Main(QMainWindow):
         } 
         with open(Path(self.main_dir, 'config.json'), 'w') as f:
             json.dump(config, f)
-        self.config = config
     
     def doc_handler(self):
         doc = Path(self.main_dir, "PyAutoMark_Documentation.pdf")
@@ -723,6 +714,7 @@ class Main(QMainWindow):
                     varMod = reload(varMod)
                     res = output_feed.getvalue().rstrip()
         return res
+        
     def running_assignments(self, assignment, input_feed):
         try:
             with self.time_limit(1):
