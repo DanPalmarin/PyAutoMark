@@ -9,8 +9,6 @@ from pathlib import Path
 from contextlib import contextmanager, redirect_stdout
 from io import StringIO
 from importlib import import_module, reload
-# import PyQt5
-# from PyQt5 import QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui     import *
 from PyQt5.QtCore    import *
@@ -82,12 +80,11 @@ class Main(QMainWindow):
     # Select answer key
     def button1_handler(self):
         if self.ui.radioButton1.isChecked():
-            filename = QFileDialog.getOpenFileName(None, "Select a solution key (.py).", self.CS20button1_dir, "Python file (*.py)")
+            filename = QFileDialog.getOpenFileName(None, "Select a solution key (.py).", self.CS20button1_dir, "Python file (*.py)") #returns as tuple: (path, type)
         elif self.ui.radioButton2.isChecked():
-            filename = QFileDialog.getOpenFileName(None, "Select a solution key (.py).", self.CS30button1_dir, "Python file (*.py)")
+            filename = QFileDialog.getOpenFileName(None, "Select a solution key (.py).", self.CS30button1_dir, "Python file (*.py)") #returns as tuple: (path, type)
             
         self.button1_file = filename[0]
-        #self.CS20button1_dir = os.path.dirname(self.button1_file)
         self.button1_basename = os.path.basename(self.button1_file)
 
         if self.button1_file != "":
@@ -104,6 +101,9 @@ class Main(QMainWindow):
             
             with open('config.json', 'w') as f:
                     json.dump(self.config, f)
+            
+            # update the CS20button1_dir with the user selected directory
+            self.CS20button1_dir = os.path.dirname(self.button1_file)
         else:
             self.button1_bool = False
             self.ui.label1.setText("")
@@ -117,9 +117,9 @@ class Main(QMainWindow):
     # Select Moodle zip
     def button2_handler(self):
         if self.ui.radioButton1.isChecked():
-            self.moodle_zip = QFileDialog.getOpenFileName(None, "Select a single Moodle zip file (.zip).", self.CS20button2_dir, "Zip file (*.zip)")[0] #returns as tuple: (path, type)
+            self.moodle_zip = QFileDialog.getOpenFileName(None, "Select a single Moodle zip file (.zip).", self.CS20button2_dir, "Zip file (*.zip)")[0]
         elif self.ui.radioButton2.isChecked():
-            self.moodle_zip = QFileDialog.getOpenFileName(None, "Select a single Moodle zip file (.zip).", self.CS30button2_dir, "Zip file (*.zip)")[0] #returns as tuple: (path, type)
+            self.moodle_zip = QFileDialog.getOpenFileName(None, "Select a single Moodle zip file (.zip).", self.CS30button2_dir, "Zip file (*.zip)")[0]
         
         self.moodle_zip_file = Path(self.moodle_zip)
         self.moodle_dir = Path(self.moodle_zip).resolve().parent # directory of the moodle zip
@@ -137,7 +137,10 @@ class Main(QMainWindow):
             
             with open('config.json', 'w') as f:
                     json.dump(self.config, f)
-                    
+            
+            # update the CS20button2_dir with the user selected directory
+            self.CS20button2_dir = os.path.dirname(self.moodle_zip)
+            
             # counts the number of zip files in the Moodle zip
             zip_file = zipfile.ZipFile(self.moodle_zip_file, 'r')
             zip_file_num = 0
@@ -161,9 +164,9 @@ class Main(QMainWindow):
     # Select assignments
     def button3_handler(self):
         if self.ui.radioButton1.isChecked():
-            filename = QFileDialog.getOpenFileNames(None, "Select any number of student assignments (.zip).", self.CS20button3_dir, "Zip file(s) (*.zip)")
+            filename = QFileDialog.getOpenFileNames(None, "Select any number of student assignments (.zip).", self.CS20button3_dir, "Zip file(s) (*.zip)") #returns as tuple: (path, type)
         elif self.ui.radioButton2.isChecked():
-            filename = QFileDialog.getOpenFileNames(None, "Select any number of student assignments (.zip).", self.CS30button3_dir, "Zip file(s) (*.zip)")
+            filename = QFileDialog.getOpenFileNames(None, "Select any number of student assignments (.zip).", self.CS30button3_dir, "Zip file(s) (*.zip)") #returns as tuple: (path, type)
         
         self.button3_list = filename[0]
         
@@ -183,6 +186,9 @@ class Main(QMainWindow):
             
             with open('config.json', 'w') as f:
                 json.dump(self.config, f)
+            
+            # # update the CS20button3_dir with the user selected directory
+            # self.CS20button3_dir = os.path.dirname(self.button3_list)
         else:
             self.button3_bool = False
             self.ui.label3.setText("")
@@ -478,6 +484,7 @@ class Main(QMainWindow):
                         shutil.rmtree(self.extracted_dir) # detete the 'Temp_Extracted' directory and all of its contents
             
             self.ui.button6.setEnabled(True)
+            self.ui.table1.setSortingEnabled(True)
 
     # Output Directory
     def button6_handler(self):
