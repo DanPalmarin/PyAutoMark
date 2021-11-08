@@ -1,0 +1,37 @@
+Assignment 1
+
+1. Correct
+
+2. Correct
+
+3. Correct
+    -Test 1: success
+    -Test 2: success
+
+4. Correct
+    -Test 1: success
+    -Test 2: success
+
+5. Correct
+    -Test 1: success
+    -Test 2: success
+    -Test 3: success
+    -Test 4: success
+
+6. Correct
+
+7. Correct
+    -Test 1: success
+    -Test 2: success
+
+8. Correct
+    -Test 1: success
+    -Test 2: success
+
+9. Correct
+    -Test 1: success
+    -Test 2: success
+
+10. Correct
+    -Test 1: success
+

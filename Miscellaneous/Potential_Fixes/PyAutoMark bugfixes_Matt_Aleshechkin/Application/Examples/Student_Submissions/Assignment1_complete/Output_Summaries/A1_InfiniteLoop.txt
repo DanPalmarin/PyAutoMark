@@ -1,0 +1,42 @@
+Assignment 1
+
+1. Incorrect
+     Desired output: Hello 
+     Your output: Error: Program exceeded time limit
+
+2. Correct
+
+3. Correct
+    -Test 1: success
+    -Test 2: success
+
+4. Correct
+    -Test 1: success
+    -Test 2: success
+
+5. Correct
+    -Test 1: success
+    -Test 2: success
+    -Test 3: success
+    -Test 4: success
+
+6. Correct
+
+7. Correct
+    -Test 1: success
+    -Test 2: success
+
+8. Correct
+    -Test 1: success
+    -Test 2: success
+
+9. Correct
+    -Test 1: success
+    -Test 2: success
+
+10. Incorrect
+    -Test 1: failure
+       Input: (1, 4, 2)
+       Desired output: -0.59   -3.41
+       Your output: Root 1 is: -0.59   Root 2 is: -3.41
+

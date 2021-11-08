@@ -1,5 +1,5 @@
 BUGS 
-(1) (High priority)
+(1)
 - Initialize the program: Open PyAutoMark and go Tools > Reset, then close it and reopen it.
 - Check CS20
 - Select any key (A6 key)
@@ -8,7 +8,7 @@ BUGS
 - NOTE: The path seems to save only upon closing the program and reopening it. The problem seems to be with the json file.
 
 
-(2) (High priority)
+(2)
 - Open PyAutoMark
 - Check CS20
 - Select A7 key
@@ -21,13 +21,6 @@ BUGS
 - Run program
 - Grades are blank on all except for 1 or 2
 - NOTE: The solution here has something to do with the cells being reordered. I probably need to store all of the table date in a list or dictionary and alphabetize that object to synch with the "Name" button effect.
-
-(3) (Low priority)
-- If the key question input is something like:
-	Q3 = ("L2: 1 item", "L3: 5 items")
-then it doesn't match student work. But
-	Q3 = "L2: 1 item\nL3: 5 items"
-works just fine.
 
 
 IMPROVEMENTS
