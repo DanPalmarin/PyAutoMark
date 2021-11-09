@@ -734,10 +734,17 @@ class Main(QMainWindow):
         try:
             with self.time_limit(1):
                 res = self.run(assignment,input_feed)
+        except SystemExit:
+            res = "Please don't use exit() or sys.exit(). They are useful for the interactive interpreter shell but should not be used in programs."
+        except KeyboardInterrupt as err:
+            res = "Error: {0}".format(err)
+        except GeneratorExit as err:
+            res = "Error: {0}".format(err)
         except TimeoutError:
             res = "Error: Program exceeded time limit. Possible infinite loop."
         except Exception as err:
             res = "Error: {0}".format(err)
+            
         return res
         
     def in_out_with_newlines(self, some_tuple):
