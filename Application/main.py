@@ -14,7 +14,6 @@ from PyQt5.QtGui     import *
 from PyQt5.QtCore    import *
 from PyQt5.sip import assign
 from main_window import Ui_MainWindow
-#from moodle_window import Ui_MoodleWindow
 
 class Main(QMainWindow):
     def __init__(self):
