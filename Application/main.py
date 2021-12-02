@@ -14,7 +14,6 @@ from PyQt5.QtGui     import *
 from PyQt5.QtCore    import *
 from PyQt5.sip import assign
 from main_window import Ui_MainWindow
-# import traceback
 
 class Main(QMainWindow):
     def __init__(self):
@@ -279,11 +278,6 @@ class Main(QMainWindow):
                                     shutil.copy(file,self.extracted_dir)
                     os.chdir(lastdir)
                     
-                    # Get all possible names for each question
-                    legal_questions = []
-                    for x in range(1,len(solMod.Q_all) + 1):
-                        legal_questions.append(f"A{solMod.assignment_num}_{x}")
-
                     ### Change name of each A#_# to be A#_#NAME so that each module is unique.
                     for entry in os.scandir(self.extracted_dir):
                         ### Here's where we append the student name to the file name so that each imported script is unique (to avoid builtin function overwrite errors)
@@ -291,11 +285,10 @@ class Main(QMainWindow):
                         entry_dir = old_entry.parent # C:\Users\USERNAME\some_directories\Temp_Extracted
                         old_entry_tail = old_entry.stem # A#_#
                         entry_ext = old_entry.suffix # .py extension
-                        if(entry_ext == ".py" and old_entry_tail in legal_questions):
-                            new_entry = "{}\{}{}{}".format(entry_dir, old_entry_tail, safe_student_name, entry_ext) #Full_dir\Temp_Extracted\A#_#NAME.py
-                            new_entry = Path(new_entry)
-                            new_entry_tail = new_entry.stem # A#_#NAME
-                            os.rename(old_entry, new_entry) #rename the current .py file
+                        new_entry = "{}\{}{}{}".format(entry_dir, old_entry_tail, safe_student_name, entry_ext) #Full_dir\Temp_Extracted\A#_#NAME.py
+                        new_entry = Path(new_entry)
+                        new_entry_tail = new_entry.stem # A#_#NAME
+                        os.rename(old_entry, new_entry) #rename the current .py file
                     
                     # Running grade total
                     self.grade = 0
@@ -415,11 +408,6 @@ class Main(QMainWindow):
                                     shutil.copy(file,self.extracted_dir)
                     os.chdir(lastdir)
                     
-                    # Get all possible names for each question
-                    legal_questions = []
-                    for x in range(1,len(solMod.Q_all) + 1):
-                        legal_questions.append(f"A{solMod.assignment_num}_{x}")
-                    
                     ### Change name of each A#_# to be A#_#NAME so that each module is unique.
                     for entry in os.scandir(self.extracted_dir):
                         ### Here's where we append the student name to the file name so that each imported script is unique (to avoid builtin function overwrite errors)
@@ -427,11 +415,10 @@ class Main(QMainWindow):
                         entry_dir = old_entry.parent # C:\Users\USERNAME\some_directories\Temp_Extracted
                         old_entry_tail = old_entry.stem # A#_#
                         entry_ext = old_entry.suffix # .py extension
-                        if(entry_ext == ".py" and old_entry_tail in legal_questions):
-                            new_entry = "{}\{}{}{}".format(entry_dir, old_entry_tail, safe_student_name, entry_ext) #Full_dir\Temp_Extracted\A#_#NAME.py
-                            new_entry = Path(new_entry)
-                            new_entry_tail = new_entry.stem # A#_#NAME
-                            os.rename(old_entry, new_entry) #rename the current .py file
+                        new_entry = "{}\{}{}{}".format(entry_dir, old_entry_tail, safe_student_name, entry_ext) #Full_dir\Temp_Extracted\A#_#NAME.py
+                        new_entry = Path(new_entry)
+                        new_entry_tail = new_entry.stem # A#_#NAME
+                        os.rename(old_entry, new_entry) #rename the current .py file
                     
                     # Running grade total
                     self.grade = 0
@@ -743,9 +730,6 @@ class Main(QMainWindow):
                     res = output_feed.getvalue().rstrip()
         return res
     def running_assignments(self, assignment, input_feed):
-        #Keep copy of currently imported modules to ignore any modules that are imported by user programs
-        temp_modules = sys.modules.copy()
-        
         try:
             with self.time_limit(1):
                 res = self.run(assignment,input_feed)
@@ -759,8 +743,7 @@ class Main(QMainWindow):
             res = "Error: Program exceeded time limit. Possible infinite loop."
         except Exception as err:
             res = "Error: {0}".format(err)
-            # res = "Error: {0}".format(traceback.format_exc())
-        sys.modules = temp_modules
+            
         return res
         
     def in_out_with_newlines(self, some_tuple):
