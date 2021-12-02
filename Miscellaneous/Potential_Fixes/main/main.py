@@ -296,6 +296,7 @@ class Main(QMainWindow):
                             new_entry = Path(new_entry)
                             new_entry_tail = new_entry.stem # A#_#NAME
                             os.rename(old_entry, new_entry) #rename the current .py file
+                            print(new_entry)
                     
                     # Running grade total
                     self.grade = 0
@@ -745,7 +746,6 @@ class Main(QMainWindow):
     def running_assignments(self, assignment, input_feed):
         #Keep copy of currently imported modules to ignore any modules that are imported by user programs
         temp_modules = sys.modules.copy()
-        
         try:
             with self.time_limit(1):
                 res = self.run(assignment,input_feed)
