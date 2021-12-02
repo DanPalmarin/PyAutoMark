@@ -285,18 +285,17 @@ class Main(QMainWindow):
                         legal_questions.append(f"A{solMod.assignment_num}_{x}")
 
                     ### Change name of each A#_# to be A#_#NAME so that each module is unique.
-                    for entry in os.scandir(self.extracted_dir):
-                        ### Here's where we append the student name to the file name so that each imported script is unique (to avoid builtin function overwrite errors)
-                        old_entry = Path(entry.path) # Full path to .py file as a string.
-                        entry_dir = old_entry.parent # C:\Users\USERNAME\some_directories\Temp_Extracted
-                        old_entry_tail = old_entry.stem # A#_#
-                        entry_ext = old_entry.suffix # .py extension
-                        if(entry_ext == ".py" and old_entry_tail in legal_questions):
-                            new_entry = "{}\{}{}{}".format(entry_dir, old_entry_tail, safe_student_name, entry_ext) #Full_dir\Temp_Extracted\A#_#NAME.py
-                            new_entry = Path(new_entry)
-                            new_entry_tail = new_entry.stem # A#_#NAME
-                            os.rename(old_entry, new_entry) #rename the current .py file
-                            print(new_entry)
+                    # for entry in os.scandir(self.extracted_dir):
+                        # ### Here's where we append the student name to the file name so that each imported script is unique (to avoid builtin function overwrite errors)
+                        # old_entry = Path(entry.path) # Full path to .py file as a string.
+                        # entry_dir = old_entry.parent # C:\Users\USERNAME\some_directories\Temp_Extracted
+                        # old_entry_tail = old_entry.stem # A#_#
+                        # entry_ext = old_entry.suffix # .py extension
+                        # if(entry_ext == ".py" and old_entry_tail in legal_questions):
+                            # new_entry = "{}\{}{}{}".format(entry_dir, old_entry_tail, safe_student_name, entry_ext) #Full_dir\Temp_Extracted\A#_#NAME.py
+                            # new_entry = Path(new_entry)
+                            # new_entry_tail = new_entry.stem # A#_#NAME
+                            # # os.rename(old_entry, new_entry) #rename the current .py file
                     
                     # Running grade total
                     self.grade = 0
@@ -309,7 +308,8 @@ class Main(QMainWindow):
                     for i in question_numbers:
                         mark = 0 # Initialize the mark that a student gets on a question as 0
                         for entry in os.scandir(self.extracted_dir):
-                            if "A{0}_{1}{2}.py".format(solMod.assignment_num, i, safe_student_name) in entry.path:
+                            #if "A{0}_{1}{2}.py".format(solMod.assignment_num, i, safe_student_name) in entry.path:
+                            if "A{0}_{1}.py".format(solMod.assignment_num, i) in entry.path:
                                 marked_questions.append(i)
                                 
                                 if type(solMod.Q_all[i-1]) is dict:
@@ -422,17 +422,17 @@ class Main(QMainWindow):
                         legal_questions.append(f"A{solMod.assignment_num}_{x}")
                     
                     ### Change name of each A#_# to be A#_#NAME so that each module is unique.
-                    for entry in os.scandir(self.extracted_dir):
-                        ### Here's where we append the student name to the file name so that each imported script is unique (to avoid builtin function overwrite errors)
-                        old_entry = Path(entry.path) # Full path to .py file as a string.
-                        entry_dir = old_entry.parent # C:\Users\USERNAME\some_directories\Temp_Extracted
-                        old_entry_tail = old_entry.stem # A#_#
-                        entry_ext = old_entry.suffix # .py extension
-                        if(entry_ext == ".py" and old_entry_tail in legal_questions):
-                            new_entry = "{}\{}{}{}".format(entry_dir, old_entry_tail, safe_student_name, entry_ext) #Full_dir\Temp_Extracted\A#_#NAME.py
-                            new_entry = Path(new_entry)
-                            new_entry_tail = new_entry.stem # A#_#NAME
-                            os.rename(old_entry, new_entry) #rename the current .py file
+                    # for entry in os.scandir(self.extracted_dir):
+                        # ### Here's where we append the student name to the file name so that each imported script is unique (to avoid builtin function overwrite errors)
+                        # old_entry = Path(entry.path) # Full path to .py file as a string.
+                        # entry_dir = old_entry.parent # C:\Users\USERNAME\some_directories\Temp_Extracted
+                        # old_entry_tail = old_entry.stem # A#_#
+                        # entry_ext = old_entry.suffix # .py extension
+                        # if(entry_ext == ".py" and old_entry_tail in legal_questions):
+                            # new_entry = "{}\{}{}{}".format(entry_dir, old_entry_tail, safe_student_name, entry_ext) #Full_dir\Temp_Extracted\A#_#NAME.py
+                            # new_entry = Path(new_entry)
+                            # new_entry_tail = new_entry.stem # A#_#NAME
+                            # # os.rename(old_entry, new_entry) #rename the current .py file
                     
                     # Running grade total
                     self.grade = 0
@@ -445,7 +445,8 @@ class Main(QMainWindow):
                     for i in question_numbers:
                         mark = 0 # Initialize the mark that a student gets on a question as 0
                         for entry in os.scandir(self.extracted_dir):
-                            if "A{0}_{1}{2}.py".format(solMod.assignment_num, i, safe_student_name) in entry.path:
+                            #if "A{0}_{1}{2}.py".format(solMod.assignment_num, i, safe_student_name) in entry.path:
+                            if "A{0}_{1}.py".format(solMod.assignment_num, i) in entry.path:
                                 marked_questions.append(i)
                                 
                                 if type(solMod.Q_all[i-1]) is dict:
@@ -732,16 +733,17 @@ class Main(QMainWindow):
 
     def run(self, assignment, input_feed):
         output_feed = StringIO()
+        #print(assignment, self.modules)
         with redirect_stdout(output_feed):
             with self.replace_stdin(StringIO(input_feed)):
                 if assignment not in self.modules:
                     varMod = import_module(assignment)
-                    self.modules.append(assignment)
+                    #self.modules.append(assignment)
                     res = output_feed.getvalue().rstrip()
-                else:
-                    varMod = import_module(assignment)
-                    varMod = reload(varMod)
-                    res = output_feed.getvalue().rstrip()
+                #else:
+                #    varMod = import_module(assignment)
+                #    varMod = reload(varMod)
+                #    res = output_feed.getvalue().rstrip()
         return res
     def running_assignments(self, assignment, input_feed):
         #Keep copy of currently imported modules to ignore any modules that are imported by user programs
@@ -760,7 +762,12 @@ class Main(QMainWindow):
         except Exception as err:
             res = "Error: {0}".format(err)
             # res = "Error: {0}".format(traceback.format_exc())
-        sys.modules = temp_modules
+        #print(set(temp_modules).symmetric_difference(set(sys.modules)))
+        sys.modules = temp_modules.copy()
+        #try:
+        #    sys.modules.pop("chessmoves")
+        #except:
+        #    pass
         return res
         
     def in_out_with_newlines(self, some_tuple):
