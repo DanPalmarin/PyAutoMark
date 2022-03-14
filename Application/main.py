@@ -4,6 +4,7 @@ import shutil
 import json
 import zipfile
 import threading
+import imports
 import _thread
 from pathlib import Path
 from contextlib import contextmanager, redirect_stdout
@@ -737,7 +738,23 @@ class Main(QMainWindow):
         with redirect_stdout(output_feed):
             with self.replace_stdin(StringIO(input_feed)):
                 if assignment not in self.modules:
-                    varMod = import_module(assignment)
+                    for x in sys.modules:# Clear all modules
+                        if(x in ['_io']):
+                            continue
+                        sys.modules[x] = None
+                    sys.path = [self.extracted_dir.as_posix()] # Empty import paths (removes access to pip installed packages)
+
+                    functions = Path(self.main_dir,"functions.py")
+                    functions_temp = Path(self.extracted_dir, assignment + ".py")
+                    
+                    assignment_file = Path(self.extracted_dir, assignment + ".py")
+                    shutil.copy(assignment_file, assignment_file.as_posix() + "___") # Backup student script
+
+                    shutil.copy(functions, functions_temp)
+                    tempMod = import_module(assignment) # Importing script to overwrite builtin functions (open, exec, etc.)
+                    shutil.copy(assignment_file.as_posix() + "___", assignment_file)
+
+                    reload(tempMod)
                     #self.modules.append(assignment)
                     res = output_feed.getvalue().rstrip()
                 #else:
@@ -748,6 +765,9 @@ class Main(QMainWindow):
     def running_assignments(self, assignment, input_feed):
         #Keep copy of currently imported modules to ignore any modules that are imported by user programs
         temp_modules = sys.modules.copy()
+        temp_import_paths = sys.path.copy()
+        # sys.path = [] # clear imports
+        # sys.modules = []
         try:
             with self.time_limit(1):
                 res = self.run(assignment,input_feed)
@@ -764,6 +784,7 @@ class Main(QMainWindow):
             # res = "Error: {0}".format(traceback.format_exc())
         #print(set(temp_modules).symmetric_difference(set(sys.modules)))
         sys.modules = temp_modules.copy()
+        sys.path = temp_import_paths.copy()
         #try:
         #    sys.modules.pop("chessmoves")
         #except:
