@@ -1,1 +1,1 @@
-exec("print('i work')")
+import sys

@@ -4,7 +4,6 @@ import shutil
 import json
 import zipfile
 import threading
-import imports
 import _thread
 from pathlib import Path
 from contextlib import contextmanager, redirect_stdout
@@ -19,6 +18,9 @@ from main_window import Ui_MainWindow
 
 class Main(QMainWindow):
     def __init__(self):
+
+        self.whitelisted = ["math","_io"] # Permitted moduled when executing functions
+
         # Initialize the main window
         super().__init__()
         
@@ -27,6 +29,13 @@ class Main(QMainWindow):
             self.main_dir = os.path.dirname(sys.executable)
         else:
             self.main_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        import_file = Path(self.main_dir + "/imports.txt")
+        with open(import_file,"r") as file:
+            f = file.read().split("\n")
+            for w in f:
+                if(w not in sys.modules and w not in self.whitelisted):
+                    sys.modules[w] = None
             
         #Build the main window interface from main_window.py
         self.ui = Ui_MainWindow()
@@ -503,10 +512,12 @@ class Main(QMainWindow):
 
     # Output Directory
     def button6_handler(self):
-        os.startfile(self.output_dir) # Windows only; this lauches the folder that contains the output .txt files (in explorer)
+        pass
+        #os.startfile(self.output_dir) # Windows only; this lauches the folder that contains the output .txt files (in explorer)
    
     def list1_handler(self, item):
-        os.startfile("{0}\\{1}".format(self.output_dir, item.text())) # Windows only;
+        pass
+        #os.startfile("{0}\\{1}".format(self.output_dir, item.text())) # Windows only;
 
     def clear_handler(self):
         self.ui.table1.setRowCount(0) # clears the table
@@ -739,7 +750,7 @@ class Main(QMainWindow):
             with self.replace_stdin(StringIO(input_feed)):
                 if assignment not in self.modules:
                     for x in sys.modules:# Clear all modules
-                        if(x in ['_io']):
+                        if(x in self.whitelisted):
                             continue
                         sys.modules[x] = None
                     sys.path = [self.extracted_dir.as_posix()] # Empty import paths (removes access to pip installed packages)
