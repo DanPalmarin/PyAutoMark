@@ -30,7 +30,7 @@ class Main(QMainWindow):
         else:
             self.main_dir = os.path.dirname(os.path.abspath(__file__))
         
-        import_file = Path(self.main_dir + "/imports.txt")
+        import_file = Path(self.main_dir + "/imports.txt") # "Imports" all of the modules in imports.txt. It sets them as none in sys.modules
         with open(import_file,"r") as file:
             f = file.read().split("\n")
             for w in f:
@@ -512,12 +512,10 @@ class Main(QMainWindow):
 
     # Output Directory
     def button6_handler(self):
-        pass
-        #os.startfile(self.output_dir) # Windows only; this lauches the folder that contains the output .txt files (in explorer)
+        os.startfile(self.output_dir) # Windows only; this lauches the folder that contains the output .txt files (in explorer)
    
     def list1_handler(self, item):
-        pass
-        #os.startfile("{0}\\{1}".format(self.output_dir, item.text())) # Windows only;
+        os.startfile("{0}\\{1}".format(self.output_dir, item.text())) # Windows only;
 
     def clear_handler(self):
         self.ui.table1.setRowCount(0) # clears the table
@@ -755,6 +753,8 @@ class Main(QMainWindow):
                         sys.modules[x] = None
                     sys.path = [self.extracted_dir.as_posix()] # Empty import paths (removes access to pip installed packages)
 
+                    # Removes some built in functions. Not fully isolated, 
+                    # but it's good enough that someone would have to really try to get out of the sandbox
                     functions = Path(self.main_dir,"functions.py")
                     functions_temp = Path(self.extracted_dir, assignment + ".py")
                     
