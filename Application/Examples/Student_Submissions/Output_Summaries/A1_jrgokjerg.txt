@@ -1,0 +1,33 @@
+Assignment 1
+
+1. Incorrect
+     Desired output: Hello 
+     Your output: Error: import of sys halted; None in sys.modules
+
+2. Incorrect
+     Desired output: Use the Force 
+     Your output: Error: 'NoneType' object is not callable
+
+3. Incorrect
+    -Test 1: failure
+       Input: (2.5, 2.5)
+       Desired output: 10.0
+       Your output: Error: import of re halted; None in sys.modules
+
+    -Test 2: failure
+       Input: (1, 2)
+       Desired output: 7.5
+       Your output: Error: import of re halted; None in sys.modules
+
+4. Incorrect
+    -Test 1: failure
+       Input: -5
+       Desired output: 5.0
+       Your output: 
+
+    -Test 2: failure
+       Input: 10
+       Desired output: 20.0
+       Your output: 
+
+*The following questions were not found: 5, 6, 7, 8, 9, 10.

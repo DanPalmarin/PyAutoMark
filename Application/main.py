@@ -18,6 +18,9 @@ from main_window import Ui_MainWindow
 
 class Main(QMainWindow):
     def __init__(self):
+
+        self.whitelisted = ["math","_io"] # Permitted moduled when executing functions
+
         # Initialize the main window
         super().__init__()
         
@@ -26,6 +29,13 @@ class Main(QMainWindow):
             self.main_dir = os.path.dirname(sys.executable)
         else:
             self.main_dir = os.path.dirname(os.path.abspath(__file__))
+        
+        import_file = Path(self.main_dir + "/imports.txt") # "Imports" all of the modules in imports.txt. It sets them as none in sys.modules
+        with open(import_file,"r") as file:
+            f = file.read().split("\n")
+            for w in f:
+                if(w not in sys.modules and w not in self.whitelisted):
+                    sys.modules[w] = None
             
         #Build the main window interface from main_window.py
         self.ui = Ui_MainWindow()
@@ -737,7 +747,25 @@ class Main(QMainWindow):
         with redirect_stdout(output_feed):
             with self.replace_stdin(StringIO(input_feed)):
                 if assignment not in self.modules:
-                    varMod = import_module(assignment)
+                    for x in sys.modules:# Clear all modules
+                        if(x in self.whitelisted):
+                            continue
+                        sys.modules[x] = None
+                    sys.path = [self.extracted_dir.as_posix()] # Empty import paths (removes access to pip installed packages)
+
+                    # Removes some built in functions. Not fully isolated, 
+                    # but it's good enough that someone would have to really try to get out of the sandbox
+                    functions = Path(self.main_dir,"functions.py")
+                    functions_temp = Path(self.extracted_dir, assignment + ".py")
+                    
+                    assignment_file = Path(self.extracted_dir, assignment + ".py")
+                    shutil.copy(assignment_file, assignment_file.as_posix() + "___") # Backup student script
+
+                    shutil.copy(functions, functions_temp)
+                    tempMod = import_module(assignment) # Importing script to overwrite builtin functions (open, exec, etc.)
+                    shutil.copy(assignment_file.as_posix() + "___", assignment_file)
+
+                    reload(tempMod)
                     #self.modules.append(assignment)
                     res = output_feed.getvalue().rstrip()
                 #else:
@@ -748,6 +776,9 @@ class Main(QMainWindow):
     def running_assignments(self, assignment, input_feed):
         #Keep copy of currently imported modules to ignore any modules that are imported by user programs
         temp_modules = sys.modules.copy()
+        temp_import_paths = sys.path.copy()
+        # sys.path = [] # clear imports
+        # sys.modules = []
         try:
             with self.time_limit(1):
                 res = self.run(assignment,input_feed)
@@ -764,6 +795,7 @@ class Main(QMainWindow):
             # res = "Error: {0}".format(traceback.format_exc())
         #print(set(temp_modules).symmetric_difference(set(sys.modules)))
         sys.modules = temp_modules.copy()
+        sys.path = temp_import_paths.copy()
         #try:
         #    sys.modules.pop("chessmoves")
         #except:
