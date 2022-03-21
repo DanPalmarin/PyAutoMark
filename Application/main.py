@@ -752,7 +752,8 @@ class Main(QMainWindow):
                             continue
                         sys.modules[x] = None
                     sys.path = [self.extracted_dir.as_posix()] # Empty import paths (removes access to pip installed packages)
-
+                    
+                    ####
                     # Removes some built in functions. Not fully isolated, 
                     # but it's good enough that someone would have to really try to get out of the sandbox
                     functions = Path(self.main_dir,"functions.py")
@@ -766,6 +767,10 @@ class Main(QMainWindow):
                     shutil.copy(assignment_file.as_posix() + "___", assignment_file)
 
                     reload(tempMod)
+                    #replace with varMod = import_module(assignment)
+                    ####
+                    
+                    
                     #self.modules.append(assignment)
                     res = output_feed.getvalue().rstrip()
                 #else:
