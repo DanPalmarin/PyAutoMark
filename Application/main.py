@@ -31,7 +31,7 @@ class Main(QMainWindow):
             self.main_dir = os.path.dirname(os.path.abspath(__file__))
         
         import_file = Path(self.main_dir + "/imports.txt") # "Imports" all of the modules in imports.txt. It sets them as none in sys.modules
-        with open(import_file,"r") as file:
+        with open(import_file,"r", encoding="utf-8") as file:
             f = file.read().split("\n")
             for w in f:
                 if(w not in sys.modules and w not in self.whitelisted):
@@ -43,7 +43,7 @@ class Main(QMainWindow):
         
         # Read in config settings from config.json
         try:
-            with open(Path(self.main_dir, 'config.json'), 'r') as f:
+            with open(Path(self.main_dir, 'config.json', encoding="utf-8"), 'r') as f:
                 self.config = json.load(f)
         except:
             self.config_initialize()
@@ -109,7 +109,7 @@ class Main(QMainWindow):
             if self.ui.radioButton2.isChecked():
                 self.config['CS30default_dir1'] = path
             
-            with open('config.json', 'w') as f:
+            with open('config.json', 'w', encoding="utf-8") as f:
                     json.dump(self.config, f)
             
             # update the CS20button1_dir with the user selected directory
@@ -145,7 +145,7 @@ class Main(QMainWindow):
             elif self.ui.radioButton2.isChecked():
                 self.config['CS30default_dir2'] = path
             
-            with open('config.json', 'w') as f:
+            with open('config.json', 'w', encoding="utf-8") as f:
                     json.dump(self.config, f)
             
             # update the CS20button2_dir with the user selected directory
@@ -194,7 +194,7 @@ class Main(QMainWindow):
             elif self.ui.radioButton2.isChecked():
                 self.config['CS30default_dir3'] = path
             
-            with open('config.json', 'w') as f:
+            with open('config.json', 'w', encoding="utf-8") as f:
                 json.dump(self.config, f)
             
             # # update the CS20button3_dir with the user selected directory
@@ -274,7 +274,7 @@ class Main(QMainWindow):
                     
                     # If the zip_file is from a bulk moodle download, the name must be file_name for easy feedback dump.
                     self.output_file = Path(self.output_dir, "{0}{1}".format(file_name,".txt"))
-                    with open(self.output_file, 'w') as f:
+                    with open(self.output_file, 'w', encoding="utf-8") as f:
                         f.write("Assignment {0}\n\n".format(solMod.assignment_num))
                     
                     lastdir = os.getcwd()
@@ -340,7 +340,7 @@ class Main(QMainWindow):
                         
                     if question_numbers != marked_questions:
                         unmarked_questions = sorted(list(set(question_numbers) - set(marked_questions)))
-                        with open(self.output_file, 'a') as f:
+                        with open(self.output_file, 'a', encoding="utf-8") as f:
                             output_arg = str(unmarked_questions)[1:-1]
                             f.write("{0}The following questions were not found: {1}.".format(chr(0x002A), output_arg))
                             NHI = True
@@ -411,7 +411,7 @@ class Main(QMainWindow):
                     # If the zip_file is from a bulk moodle download, the name must be file_name for easy feedback dump.
                     #self.output_file = Path(self.output_dir, "{0}{1}{2}".format(word1,student_name,".txt"))
                     self.output_file = Path(self.output_dir, "{0}{1}".format(file_name,".txt"))
-                    with open(self.output_file, 'w') as f:
+                    with open(self.output_file, 'w', encoding="utf-8") as f:
                         f.write("Assignment {0}\n\n".format(solMod.assignment_num))
 
                     lastdir = os.getcwd()
@@ -475,7 +475,7 @@ class Main(QMainWindow):
                         
                     if question_numbers != marked_questions:
                         unmarked_questions = sorted(list(set(question_numbers) - set(marked_questions)))
-                        with open(self.output_file, 'a') as f:
+                        with open(self.output_file, 'a', encoding="utf-8") as f:
                             output_arg = str(unmarked_questions)[1:-1]
                             f.write("{0}The following questions were not found: {1}.".format(chr(0x002A), output_arg))
                             NHI = True
@@ -535,7 +535,7 @@ class Main(QMainWindow):
         self.config_initialize()
         
         # Read in config settings from config.json
-        with open(Path(self.main_dir, 'config.json'), 'r') as f:
+        with open(Path(self.main_dir, 'config.json', encoding="utf-8"), 'r') as f:
             self.config = json.load(f)
             
         # Define key variables
@@ -569,7 +569,7 @@ class Main(QMainWindow):
         "CS30default_dir2": self.main_dir, 
         "CS30default_dir3": self.main_dir
         } 
-        with open(Path(self.main_dir, 'config.json'), 'w') as f:
+        with open(Path(self.main_dir, 'config.json', encoding="utf-8"), 'w') as f:
             json.dump(config, f)
         self.config = config
     
@@ -613,33 +613,33 @@ class Main(QMainWindow):
                         containment_check.append(str(element).strip().lower() in result.strip().lower()) #holds True or False (lower case all and remove leading and ending spaces)
                     
                     if True in containment_check: # only require one True for a success
-                        with open(outfile, 'a') as f:
+                        with open(outfile, 'a', encoding="utf-8") as f:
                             f.write("{0}. Incorrect\n     Desired output: {1} \n     Your output: {2}\n\n".format(Q_num, print_out, print_res))
                         return 0
                     else:
-                        with open(outfile, 'a') as f:
+                        with open(outfile, 'a', encoding="utf-8") as f:
                             f.write("{0}. Correct\n\n".format(Q_num))
                         return weight[Q_num-1]
                 else:
                     # This is the simple case: no newlines should be presented in desired ouput.
                     # Again, if flexible, then everything is lower cased.
                     if formatted_output.strip().lower() not in result.strip().lower():
-                        with open(outfile, 'a') as f:
+                        with open(outfile, 'a', encoding="utf-8") as f:
                             f.write("{0}. Incorrect\n     Desired output: {1} \n     Your output: {2}\n\n".format(Q_num, print_out, print_res))
                         return 0
                     else:
-                        with open(outfile, 'a') as f:
+                        with open(outfile, 'a', encoding="utf-8") as f:
                             f.write("{0}. Correct\n\n".format(Q_num))
                         return weight[Q_num-1]
             else: 
                 if result != str(formatted_output): # Checks for strict equality
                     #print("{0}. Incorrect\n      Desired output: {1} \n      Your output: {2}".format(Q_num, outp[0], result.stdout))
-                    with open(outfile, 'a') as f:
+                    with open(outfile, 'a', encoding="utf-8") as f:
                         f.write("{0}. Incorrect\n     Desired output: {1} \n     Your output: {2}\n\n".format(Q_num, print_out, result))
                     return 0
                 else:
                     #print("{0}. Correct\n".format(Q_num))
-                    with open(outfile, 'a') as f:
+                    with open(outfile, 'a', encoding="utf-8") as f:
                         f.write("{0}. Correct\n\n".format(Q_num))
                     return weight[Q_num-1]
         else:
@@ -710,20 +710,20 @@ class Main(QMainWindow):
             
             if success:
                 #print("{0}. Correct".format(Q_num))
-                with open(outfile, 'a') as f:
+                with open(outfile, 'a', encoding="utf-8") as f:
                     f.write("{0}. Correct\n".format(Q_num))
                 for line in console_output:
                     #print(line)
-                    with open(outfile, 'a') as f:
+                    with open(outfile, 'a', encoding="utf-8") as f:
                         f.write(line)
                 return weight[Q_num-1]
             else:
                 #print("{0}. Incorrect".format(Q_num))
-                with open(outfile, 'a') as f:
+                with open(outfile, 'a', encoding="utf-8") as f:
                     f.write("{0}. Incorrect\n".format(Q_num))
                 for line in console_output:
                     #print(line)
-                    with open(outfile, 'a') as f:
+                    with open(outfile, 'a', encoding="utf-8") as f:
                         f.write(line)
                 return 0
 
