@@ -18,3 +18,12 @@ IMPROVEMENTS
 
 
 (3) Directory functionality. When you go to select an assignment key, moodle zip, or individual assignment zips, and you already have some selected, if you press 'cancel', it clears what was selected. Do we want this?
+
+Note: Functools requires the following imports:
+
+from abc import get_cache_token
+from collections import namedtuple
+# import types, weakref  # Deferred to single_dispatch()
+from reprlib import recursive_repr
+from _thread import RLock
+from types import GenericAlias
