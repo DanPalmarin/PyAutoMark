@@ -19,7 +19,7 @@ from main_window import Ui_MainWindow
 class Main(QMainWindow):
     def __init__(self):
 
-        self.whitelisted = ["math","_io"] # Permitted moduled when executing functions
+        self.whitelisted = ["math","_io", "functools", "sys"] # Permitted moduled when executing functions
 
         # Initialize the main window
         super().__init__()
