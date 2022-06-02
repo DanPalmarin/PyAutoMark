@@ -19,8 +19,9 @@ from main_window import Ui_MainWindow
 class Main(QMainWindow):
     def __init__(self):
 
-        self.whitelisted = ["math","_io", "functools", "sys"] # Permitted moduled when executing functions
-
+        #self.whitelisted = ["math","_io", "functools", "sys"] # Permitted moduled when executing functions
+        self.whitelisted = ["math","_io"]
+        
         # Initialize the main window
         super().__init__()
         
@@ -841,4 +842,4 @@ if __name__ == '__main__':
     app.setStyle("Fusion")
     w = Main()
     w.show()
-    sys.exit(app.exec_())
+    #sys.exit(app.exec_())
