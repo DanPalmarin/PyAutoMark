@@ -779,6 +779,7 @@ class Main(QMainWindow):
                 #    varMod = reload(varMod)
                 #    res = output_feed.getvalue().rstrip()
         return res
+
     def running_assignments(self, assignment, input_feed):
         #Keep copy of currently imported modules to ignore any modules that are imported by user programs
         temp_modules = sys.modules.copy()
