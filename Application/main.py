@@ -13,6 +13,8 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui     import *
 from PyQt5.QtCore    import *
 from PyQt5.sip import assign
+from qt_material import apply_stylesheet, list_themes
+import qdarktheme
 from main_window import Ui_MainWindow
 # import traceback
 
@@ -839,8 +841,20 @@ if __name__ == '__main__':
         # QApplication.setAttribute(Qt.AA_UseHighDpiPixmaps, True)
         
     app = QApplication(sys.argv)
-    #app.setStyle("Windowsvista")
-    app.setStyle("Fusion")
+
+    ### THEMES ###
+    ## Default
+    #app.setStyle("Fusion")
+
+    ## From qt-material
+    # Dark themes: 0-8
+    #apply_stylesheet(app, theme=list_themes()[0])
+
+    # Light themes: 9-18
+    #apply_stylesheet(app, theme=list_themes()[9], invert_secondary=True)
+
+    ## From pyqtdarktheme
+    qdarktheme.setup_theme()
     w = Main()
     w.show()
     #sys.exit(app.exec_())
