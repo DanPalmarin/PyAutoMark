@@ -828,7 +828,6 @@ class Main(QMainWindow):
         sys.stdin = orig
 
 
-
 if __name__ == '__main__':
     #import os
     #os.environ["QT_ENABLE_HIGHDPI_SCALING"] = "1"
@@ -857,4 +856,4 @@ if __name__ == '__main__':
     qdarktheme.setup_theme()
     w = Main()
     w.show()
-    #sys.exit(app.exec_())
+    sys.exit(app.exec_())
