@@ -1,0 +1,13 @@
+Assignment 3
+
+1. Incorrect
+    -Test 1: failure
+       Input: ('sam, jacob, Marley', '3, 5, 7, 23')
+       Desired output: Invalid input.   [3, 5, 7, 23]   (3, 5, 7, 23)   {
+       Your output: Error: Program exceeded time limit. Possible infinite loop.
+
+    -Test 2: failure
+       Input: ('Frodo, Sam, Pippin, Merry', '87, 71, 99, 7')
+       Desired output: Invalid input.   [87, 71, 99, 7]   (87, 71, 99, 7)   {
+       Your output: Error: Program exceeded time limit. Possible infinite loop.
+

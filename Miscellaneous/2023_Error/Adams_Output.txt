@@ -1,0 +1,131 @@
+Assignment 3
+
+1. Incorrect
+    -Test 1: failure
+       Input: ('sam, jacob, Marley', '3, 5, 7, 23')
+       Desired output: Invalid input.   [3, 5, 7, 23]   (3, 5, 7, 23)   {
+       Your output: Error: Program exceeded time limit. Possible infinite loop.
+
+    -Test 2: failure
+       Input: ('Frodo, Sam, Pippin, Merry', '87, 71, 99, 7')
+       Desired output: Invalid input.   [87, 71, 99, 7]   (87, 71, 99, 7)   {
+       Your output: Error: Program exceeded time limit. Possible infinite loop.
+
+2. Incorrect
+    -Test 1: failure
+       Input: ('thirteen, eleventy -one, four, seven', '13, 111 , 4, 7', 'Frodo, Sam, Pippin, Merry')
+       Desired output: Invalid input.   [13, 111, 4, 7]   (13, 111, 4, 7)   {   {'Frodo': 13, 'Sam': 111, 'Pippin': 4, 'Merry': 7}
+       Your output: Error: Program exceeded time limit. Possible infinite loop.
+
+    -Test 2: failure
+       Input: ('-55, 107, -5, 44', 'Aragorn, Strider, Ellesar, King')
+       Desired output: [-55, 107, -5, 44]   (-55, 107, -5, 44)   {   {'Aragorn': -55, 'Strider': 107, 'Ellesar': -5, 'King': 44}
+       Your output: Error: Program exceeded time limit. Possible infinite loop.
+
+    -Test 3: failure
+       Input: ('3, 5, 7, 23', 'Frodo Sam Pippin Merry', 'Frodo, Sam, Pippin, Merry')
+       Desired output: Invalid input.   [3, 5, 7, 23]   (3, 5, 7, 23)   {   {'Frodo': 3, 'Sam': 5, 'Pippin': 7, 'Merry': 23}
+       Your output: Error: Program exceeded time limit. Possible infinite loop.
+
+3. Incorrect
+    -Test 1: failure
+       Input: 88 90 46 22
+       Desired output: Invalid input.
+       Your output: Error: EOF when reading a line
+
+    -Test 2: failure
+       Input: ('88, 90, 97, 82', 'English Math Computer Science History')
+       Desired output: Invalid input.
+       Your output: Error: 
+
+    -Test 3: failure
+       Input: ('88, 90, 97, 82', 'English, Math, Computer Science, History')
+       Desired output: [('English', 88), ('Math', 90), ('Computer Science', 97), ('History', 82)]   [('History', 82), ('English', 88), ('Math', 90), ('Computer Science', 97)]
+       Your output: Error: Program exceeded time limit. Possible infinite loop.
+
+    -Test 4: failure
+       Input: ('55, 62, 98, 70', 'Calculus, Chemistry, Photography, Biology')
+       Desired output: [('Calculus', 55), ('Chemistry', 62), ('Photography', 98), ('Biology', 70)]   [('Calculus', 55), ('Chemistry', 62), ('Biology', 70), ('Photography', 98)]
+       Your output: Error: Program exceeded time limit. Possible infinite loop.
+
+4. Incorrect
+    -Test 1: failure
+       Input: 3, 4, five, 2, one
+       Desired output: Invalid input.
+       Your output: Error: Program exceeded time limit. Possible infinite loop.
+
+    -Test 2: success
+    -Test 3: success
+
+5. Incorrect
+     Desired output: {'Matthew Vega': (6.2, 70)} 
+     Your output: {'Matthew Vega ': (6.2, 70)}
+
+6. Correct
+    -Test 1: success
+    -Test 2: success
+
+7. Incorrect
+    -Test 1: failure
+       Input: ('I am the Senate.', '1 2 3', 'Execute order 66.', '4 5 6')
+       Desired output: Invalid input.   Invalid input.   5 7 9
+       Your output: Error: 
+
+    -Test 2: failure
+       Input: ('1 99 -5', '-105 33 0')
+       Desired output: -104 132 -5
+       Your output: Error: list expected at most 1 argument, got 3
+
+8. Incorrect
+    -Test 1: failure
+       Input: ('09:03:32 2022-02-22', '2022 -02 -22 09:03:32', '2022-02-22 09:03:32')
+       Desired output: Invalid input.   Invalid input.   2022   2   22   09:03:32
+       Your output: ayyyyy: 09:03:32   Invalid input.   ayyyyy: 2022   Invalid input.   ayyyyy: 2022   02   22   09:03:32
+
+    -Test 2: failure
+       Input: 2022-03-19 15:50:23
+       Desired output: 2022   3   19   15:50:23
+       Your output: ayyyyy: 2022   03   19   15:50:23
+
+9. Incorrect
+    -Test 1: failure
+       Input: ('php w3r Python abcd Java aaa', 'php, w3r, Python, abcd, Java, aaa')
+       Desired output: Invalid input.   php, aaa
+       Your output: ayyy: Palindromes:
+
+    -Test 2: success
+
+10. Incorrect
+    -Test 1: failure
+       Input: two, four, seven
+       Desired output: Invalid input.
+       Your output: Error: Program exceeded time limit. Possible infinite loop.
+
+    -Test 2: success
+    -Test 3: success
+
+11. Correct
+    -Test 1: success
+    -Test 2: success
+
+12. Incorrect
+    -Test 1: success
+    -Test 2: failure
+       Input: ('Sauron', 'SauronTheCursed1')
+       Desired output: Invalid input.   Valid string.
+       Your output: here: Valid string.
+
+13. Correct
+    -Test 1: success
+    -Test 2: success
+
+14. Correct
+
+15. Incorrect
+    -Test 1: failure
+       Input: 'f', 'b', 'U', 'i', 'E', 'a', 'B', 'u'
+       Desired output: [('A', 'a'), ('B', 'b'), ('E', 'e'), ('F', 'f'), ('I', 'i'), ('U', 'u')]
+       Your output: yup:{"'u'", "'i'", "'a'", "'e'", "'f'", "'b'"}   [('U', 'u'), ('I', 'i'), ('A', 'a'), ('E', 'e'), ('F', 'f'), ('B', 'b')]
+
+    -Test 2: success
+
