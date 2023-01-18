@@ -1,0 +1,2 @@
+- If A3_key.py has more than one Qi in Q_all, the program hangs.
+- Running each Q1...Q15 individually works fine. Around half the scripts have an infinite loop error.

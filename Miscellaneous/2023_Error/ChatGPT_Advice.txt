@@ -1,0 +1,408 @@
+Daniel Palmarin
+Catch an error in an imported python module.
+To catch an error in an imported Python module, you can use a try-except block to handle any exceptions that are raised by the module. For example:
+
+Copy code
+try:
+    import mymodule
+except ImportError as e:
+    print("Error importing module:", e)
+This will catch any errors that occur while importing the mymodule module and print an error message with the specific exception that was raised.
+
+Alternatively, you can also use the built-in __import__() function to import a module by name as a string and then check if the imported module has an attribute __import_error__:
+
+Copy code
+module_name = "mymodule"
+try:
+    imported_module = __import__(module_name)
+    if hasattr(imported_module, "__import_error__"):
+        raise imported_module.__import_error__
+except ImportError as e:
+    print("Error importing module:", e)
+This will allow you to handle any import error that may occur in the imported module itself.
+
+
+
+
+Daniel Palmarin
+What if the error in the module is contained in its own tr and accept block that is contained in a while loop?
+If the error in the imported module is contained in its own try-except block within a while loop, the error will be handled within the module itself and will not be propagated to the code that imports it. In this case, the try-except block in the importing code will not be able to catch the error.
+
+To handle the error, you will need to modify the module to either raise an exception or return an error code that can be checked by the importing code. For example, you could add a return statement that returns a Boolean indicating whether the operation was successful or not:
+
+Copy code
+def mymodule_function():
+    while True:
+        try:
+            # code that may raise an error
+            return True
+        except:
+            # code to handle the error
+            return False
+Then, in the importing code, you can check the return value of the module function and take appropriate action:
+
+Copy code
+if not mymodule.mymodule_function():
+    print("An error occurred in mymodule_function.")
+Alternatively, you can also raise a custom exception from within the module, that can be caught by the importing code:
+
+Copy code
+class MyModuleError(Exception):
+    pass
+
+def mymodule_function():
+    while True:
+        try:
+            # code that may raise an error
+            return
+        except:
+            # code to handle the error
+            raise MyModuleError("An error occurred in mymodule_function.")
+And then in the importing code you can catch this custom exception with a try-except block:
+
+Copy code
+try:
+    mymodule.mymodule_function()
+except MyModuleError as e:
+    print(e)
+In this way the error will be propagated to the importing code and you will be able to handle it.
+
+
+
+
+Daniel Palmarin
+How to kill a python module import if the module is waiting for user input?
+If a Python module is waiting for user input and you want to kill the import, you can use the os module to send a keyboard interrupt signal to the running process.
+
+In order to do this, you will first need to import the os module and then use the os.kill() function to send the signal. The os.kill() function takes two arguments: the process ID (PID) of the process you want to kill, and the signal you want to send. To send a keyboard interrupt signal, you can use the constant signal.SIGINT.
+
+Here is an example of how you can use the os.kill() function to send a keyboard interrupt signal to a process:
+
+Copy code
+import os
+import signal
+
+# Get the process ID of the current process
+pid = os.getpid()
+
+# Send the keyboard interrupt signal to the process
+os.kill(pid, signal.SIGINT)
+Keep in mind that this will raise a KeyboardInterrupt exception that needs to be handled in the module, otherwise it will stop the execution of the whole script. And also that using the os.kill() function to send a signal to a process can be dangerous and should be used with caution, as it can cause the process to terminate unexpectedly, potentially causing data loss.
+
+Another way to interrupt the process is to use the python's built-in sys module, you can use sys.exit() to stop the execution of the script and also you can pass a custom exit code.
+
+Copy code
+import sys
+
+sys.exit(1)
+It is important to note that killing a process abruptly can cause data loss and other issues, it is always better to have a way to cleanly stop the process and close any open resources, if this is not possible, then use os.kill() or sys.exit() as a last resort.
+
+
+
+
+Daniel Palmarin
+What does the argument 1 in syst.exit(1) do in the above code?
+In the example above, sys.exit(1) is used to stop the execution of the script and return an exit code of 1. The argument passed to sys.exit() is the exit code of the script.
+
+Exit codes are used to indicate the status of the script's execution to the operating system. A common convention is that an exit code of 0 indicates that the script completed successfully, while a non-zero exit code indicates that an error occurred.
+
+The exact meaning of the exit code depends on the specific script and the context in which it is being run. For example, an exit code of 1 may indicate a general error, while an exit code of 2 may indicate that an invalid command line argument was provided.
+
+It's worth noting that the exit code will be returned to the operating system, and can be used by other scripts or programs that call the script to determine whether it completed successfully or not. For example, a script that calls another script and checks its exit code to determine whether it should continue execution or not.
+
+It's also worth noting that the exit code is optional, if you don't provide any argument to sys.exit() it will return 0.
+
+Copy code
+sys.exit() # return 0
+In summary, the argument passed to sys.exit() is an exit code, it's an optional integer value that indicates the status of the script execution, returning 0 means success and any other non-zero value means a failure.
+
+
+
+
+Daniel Palmarin
+Detect if a python script contains a for loop or while loop.
+You can detect if a Python script contains a for loop or while loop by reading the script's source code and searching for specific keywords. Here are two ways you can do this:
+
+Using the ast module: The ast (abstract syntax tree) module provides a way to parse Python source code and examine the structure of the code. You can use the ast.parse() function to parse the source code, and then use the ast.walk() function to traverse the tree and search for For and While nodes. Here is an example:
+Copy code
+import ast
+
+def has_loop(source_code):
+    tree = ast.parse(source_code)
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.For, ast.While)):
+            return True
+    return False
+
+source_code = """
+for i in range(10):
+    print(i)
+"""
+print(has_loop(source_code)) # True
+Using regular expressions: You can also use regular expressions to search for the keywords for and while in the source code. Here's an example that uses the re module to search for the keywords:
+Copy code
+import re
+
+def has_loop(source_code):
+    loop_regex = re.compile(r"(for|while)\s+")
+    match = loop_regex.search(source_code)
+    return match is not None
+
+source_code = """
+for i in range(10):
+    print(i)
+"""
+print(has_loop(source_code)) # True
+Both the above approaches will work, but the first approach is more robust as it uses the python's internal AST, it can detect loops even if they are inside a function, class, or inside a more complex structure, while the second approach, using regular expressions, can only detect loops that are not inside a string or comment.
+
+
+
+
+Daniel Palmarin
+Detect if a python script has a try and except inside a for or while loop.
+To detect if a Python script has a try and except block inside a for or while loop, you can use the ast module to parse the source code and examine the structure of the code. Here's an example of how you can do this:
+
+Copy code
+import ast
+
+def has_try_except_in_loop(source_code):
+    tree = ast.parse(source_code)
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.For, ast.While)):
+            for child_node in ast.iter_child_nodes(node):
+                if isinstance(child_node, ast.Try):
+                    return True
+    return False
+
+source_code = """
+for i in range(10):
+    try:
+        print(i)
+    except:
+        pass
+"""
+print(has_try_except_in_loop(source_code)) # True
+In this example, the ast.walk() function is used to traverse the tree and search for For and While nodes. For each of those nodes, the function ast.iter_child_nodes() is used to iterate over the child nodes, looking for Try nodes. If a Try node is found inside a For or While node, the function returns True. If no such node is found, the function returns False.
+
+It is worth noting that this approach can detect try and except blocks even if they are inside a function, class, or inside a more complex structure, it also can detect if try and except are nested inside another loops.
+
+Also, as an alternative you can also use regular expressions to search for the keywords try and except in the source code, but this approach can only detect a try-except block if they are not inside a string or comment, and also it can only detect the first occurrence of them in the script.
+
+
+
+Daniel Palmarin
+Like before, we have a python module with a try and except block inside a while loop. How could I detect if such a module has a try and except inside a for or while loop from my main.py.
+Here's an example of how you can detect if a Python module has a try and except block inside a for or while loop from your main.py script:
+
+Copy code
+import ast
+import importlib
+
+def has_try_except_in_loop(module_name):
+    module = importlib.import_module(module_name)
+    source_code = module.__file__
+    with open(source_code, 'r') as f:
+        source_code = f.read()
+    tree = ast.parse(source_code)
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.For, ast.While)):
+            for child_node in ast.iter_child_nodes(node):
+                if isinstance(child_node, ast.Try):
+                    return True
+    return False
+
+module_name = "mymodule"
+if has_try_except_in_loop(module_name):
+    print("Module has a try and except block inside a for or while loop.")
+else:
+    print("Module doesn't have a try and except block inside a for or while loop.")
+
+
+
+
+
+Daniel Palmarin
+And how could I modify the module from main.py to break out of the while look if has looped 3 times?
+Here's an example of how you can modify the module from main.py to break out of the while loop after it has looped 3 times:
+
+Copy code
+import importlib
+
+def modify_module(module_name):
+    module = importlib.import_module(module_name)
+    source_code = module.__file__
+    with open(source_code, 'r') as f:
+        lines = f.readlines()
+    for i, line in enumerate(lines):
+        if 'while' in line:
+            lines.insert(i+1, '    if i == 3: break\n')
+            lines.insert(i+1, '    i += 1\n')
+            lines.insert(i, '    i = 0\n')
+    with open(source_code, 'w') as f:
+        f.writelines(lines)
+    importlib.reload(module)
+
+module_name = "mymodule"
+modify_module(module_name)
+This script uses the importlib module to import the module by its name, then it opens the module's source code file, reads its content line by line, then it looks for the keyword 'while' in each line, if the keyword is found, it insert the lines i = 0, i += 1, if i == 3: break after the while statement. Then it saves the changes to the source code file. Finally, it reloads the module using importlib.reload() to apply the changes to the running program.
+
+It's important to note that this approach modifies the source code of the module, so if you plan to use this approach, make sure to have a backup of the original module, and also make sure that the module has a variable i that is being incremented inside the while loop, this way the script will know when the while loop has been executed 3 times.
+
+It's also important to note that this approach modifies the source code at runtime, this may cause a performance penalty, and also it may be hard to track the changes in the codebase if you work in a team. A better approach would be to refactor the module, and create a variable that counts the number of iterations and use an if statement to check if the number of iterations is greater than 3, then break the loop.
+
+
+
+
+Daniel Palmarin
+See the script below. If the script below is the module in question, modify it from main to break out of the while loop if it has looped 3 times. Provide an updated version of the module.
+while 1:
+    try:
+        numbers = [int(x) for x in input("Numbers: ").split(" ")]
+        print(numbers)
+        print(tuple(int(x) for x in numbers))
+        print({int(x) for x in numbers})
+        break
+    except:
+        print("Invalid input.")
+    break
+Here's an updated version of the module that will break out of the while loop after it has looped 3 times:
+
+Copy code
+i = 0
+while 1:
+    try:
+        if i == 3:
+            break
+        numbers = [int(x) for x in input("Numbers: ").split(" ")]
+        print(numbers)
+        print(tuple(int(x) for x in numbers))
+        print({int(x) for x in numbers})
+        i += 1
+    except:
+        print("Invalid input.")
+In this updated version, the variable i is initialized to 0 before the while loop. Then, inside the while loop, we added an if statement that checks if i is equal to 3, if it is, the script will break out of the while loop. At the end of the try block, we increment the value of i by 1, this way we keep track of the number of iterations.
+
+This approach modifies the logic of the script, and it's done in a way that allows the script to continue running without errors, it does not modify the source code at runtime and it does not affect the performance of the script.
+
+
+
+
+Daniel Palmarin
+Here are two methods from a python script that runs a module called 'assignment' and gives the module 'input_feed', as the module will have a input() function. How could I adjust this code to detect if 'assignment' contains a try and except inside a while or for loop, and if so, how can one of these methods modify the module to break out of the loop inside 'assignment' if it has looped 3 times?
+def run(self, assignment, input_feed):
+        output_feed = StringIO()
+        #print(assignment, self.modules)
+        with redirect_stdout(output_feed):
+            with self.replace_stdin(StringIO(input_feed)):
+                if assignment not in self.modules:
+                    for x in sys.modules:# Clear all modules
+                        if(x in self.whitelisted):
+                            continue
+                        sys.modules[x] = None
+                    sys.path = [self.extracted_dir.as_posix()] # Empty import paths (removes access to pip installed packages)
+                    
+                    ####
+                    # Removes some built in functions. Not fully isolated, 
+                    # but it's good enough that someone would have to really try to get out of the sandbox
+                    functions = Path(self.main_dir,"functions.py")
+                    functions_temp = Path(self.extracted_dir, assignment + ".py")
+                    
+                    assignment_file = Path(self.extracted_dir, assignment + ".py")
+                    shutil.copy(assignment_file, assignment_file.as_posix() + "___") # Backup student script
+
+                    shutil.copy(functions, functions_temp)
+                    tempMod = import_module(assignment) # Importing script to overwrite builtin functions (open, exec, etc.)
+                    shutil.copy(assignment_file.as_posix() + "___", assignment_file)
+
+                    reload(tempMod)
+                    #replace with varMod = import_module(assignment)
+                    ####
+                    
+                    
+                    #self.modules.append(assignment)
+                    res = output_feed.getvalue().rstrip()
+                #else:
+                #    varMod = import_module(assignment)
+                #    varMod = reload(varMod)
+                #    res = output_feed.getvalue().rstrip()
+        return res
+
+    def running_assignments(self, assignment, input_feed):
+        #Keep copy of currently imported modules to ignore any modules that are imported by user programs
+        temp_modules = sys.modules.copy()
+        temp_import_paths = sys.path.copy()
+        # sys.path = [] # clear imports
+        # sys.modules = []
+        try:
+            with self.time_limit(1):
+                res = self.run(assignment,input_feed)
+        except SystemExit:
+            res = "Please don't use exit() or sys.exit(). They are useful for the interactive interpreter shell but should not be used in programs."
+        except KeyboardInterrupt as err:
+            res = "Error: {0}".format(err)
+        except GeneratorExit as err:
+            res = "Error: {0}".format(err)
+        except TimeoutError:
+            res = "Error: Program exceeded time limit. Possible infinite loop."
+        except Exception as err:
+            res = "Error: {0}".format(err)
+            # res = "Error: {0}".format(traceback.format_exc())
+        #print(set(temp_modules).symmetric_difference(set(sys.modules)))
+        sys.modules = temp_modules.copy()
+        sys.path = temp_import_paths.copy()
+        #try:
+        #    sys.modules.pop("chessmoves")
+        #except:
+        #    pass
+        return res
+Here is how you can adjust the above code to detect if the module 'assignment' contains a try and except inside a while or for loop:
+
+Copy code
+import ast
+
+def has_try_except_in_loop(module_name):
+    with open(module_name, 'r') as f:
+        source_code = f.read()
+    tree = ast.parse(source_code)
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.For, ast.While)):
+            for child_node in ast.iter_child_nodes(node):
+                if isinstance(child_node, ast.Try):
+                    return True
+    return False
+
+assignment = "assignment.py"
+if has_try_except_in_loop(assignment):
+    print("Module has a try and except block inside a for or while loop.")
+else:
+    print("Module doesn't have a try and except block inside a for or while loop.")
+This code uses the ast module to parse the source code of the module, then it walks through the Abstract Syntax Tree (AST) of the code and checks if it contains a try and except block inside a for or while loop.
+
+To modify the module to break out of the loop inside 'assignment' if it has looped 3 times, you can add a counter variable and an if statement to the while loop.
+
+Copy code
+with open(module_name, 'r') as f:
+    lines = f.readlines()
+for i, line in enumerate(lines):
+    if 'while' in line:
+        lines.insert(i+1, '    if i == 3: break\n')
+        lines.insert(i+1, '    i += 1\n')
+        lines.insert(i, '    i = 0\n')
+with open(module_name, 'w') as f:
+    f.writelines(lines)
+This code, again, opens the module file, reads its content line by line, then it looks for the keyword 'while' in each line, if the keyword is found, it insert the lines i = 0, i += 1, if i == 3: break after the while statement. Then it saves the changes to the source code file.
+
+It's important to note that this approach modifies the source code of the module, so if you plan to use this approach, make sure to have a backup of the original module, and also make sure that the module has a variable i that is being incremented inside the while loop, this way the script will know when the while loop has been executed 3 times.
+
+It's also important to note that this approach modifies the source code at runtime, this may cause a performance penalty, and also it may be hard to track the changes in the codebase if you work in a team. A better approach would be to refactor the module, and create a variable that counts the number of iterations and use an if statement to check if the number of iterations is greater than 3, then break the loop.
+
+
+
+
+Daniel Palmarin
+Can you better explain the last sentence?
+Sure, what I meant by the last sentence is that instead of modifying the source code of the module at runtime by adding a counter variable and an if statement to the while loop as the previous code snippet, a better approach would be to refactor the code by making the necessary changes to the module directly.
+
+For example, you could create a variable called counter and initialize it to 0 before the while loop. Then, inside the while loop, you would increment the counter variable by 1 after each iteration. Finally, you would add an if statement that checks if the counter variable is greater than 3, and if it is, you would use the break statement to exit the while loop.
+
+This way, you are making the necessary changes to the module directly, and you don't need to modify the source code at runtime. This approach will be easier to maintain, and it will not cause a performance penalty as it does not modify the source code at runtime.
