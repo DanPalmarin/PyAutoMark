@@ -261,7 +261,7 @@ class Main(QMainWindow):
                     # Bulk moodle download file format: 'firstname lastname_ID#_assignsubmission_file_.zip' - set by Moodle
                     file_name = Path(zip_file).stem # returns the basename of the zip_file
                     
-                    #When the moodle zip is selected, it's nice to report the student names as "last, first", to match Aspen.
+                    #When the moodle zip is selected, it's nice to report the student names as "last, first", to match the gradebook.
                     student_name = file_name[:file_name.find('_')]
                     student_name = student_name.split()
                     student_name = "{}, {}".format(student_name[1], student_name[0])
@@ -276,7 +276,7 @@ class Main(QMainWindow):
                     Path(self.output_dir).mkdir(parents=True, exist_ok=True) #checks if output_dir exists - if not, it creates it
                     
                     # If the zip_file is from a bulk moodle download, the name must be file_name for easy feedback dump.
-                    self.output_file = Path(self.output_dir, "{0}{1}".format(file_name,".txt"))
+                    self.output_file = Path(self.output_dir, "{0}_{1}".format(file_name,".txt"))
                     with open(self.output_file, 'w', encoding="utf-8") as f:
                         f.write("Assignment {0}\n\n".format(solMod.assignment_num))
                     
@@ -365,7 +365,7 @@ class Main(QMainWindow):
                     self.ui.table1.setItem(rowPosition,1, item)
 
                     # Populate the list with the name of the output text file
-                    self.ui.list1.addItem(QListWidgetItem("{0}.txt".format(file_name)))
+                    self.ui.list1.addItem(QListWidgetItem("{0}_.txt".format(file_name)))
                     #self.ui.list1.addItem(QListWidgetItem("{0}{1}.txt".format(word1, student_name)))
                 
                     # Add zip_file to checked if it isn't in already
