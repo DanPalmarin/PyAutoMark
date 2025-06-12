@@ -62,6 +62,9 @@ class Main(QMainWindow):
         self.button3_bool = False
         self.checked = [] # this will hold all previously checked zipped file paths
         self.modules = [] # this will hold all previously imported student assignments
+
+        # Table column stretch
+        self.ui.table1.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         
         # Define menubar functionality
         self.ui.actionClear.triggered.connect(self.clear_handler)
