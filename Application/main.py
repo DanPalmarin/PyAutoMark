@@ -13,7 +13,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui     import *
 from PyQt5.QtCore    import *
 from PyQt5.sip import assign
-from qt_material import apply_stylesheet, list_themes
+#from qt_material import apply_stylesheet, list_themes
 import qdarktheme
 from main_window import Ui_MainWindow
 # import traceback
@@ -46,7 +46,7 @@ class Main(QMainWindow):
         
         # Read in config settings from config.json
         try:
-            with open(Path(self.main_dir, 'config.json', encoding="utf-8"), 'r') as f:
+            with open(Path(self.main_dir, 'config.json'), 'r', encoding="utf-8") as f:
                 self.config = json.load(f)
         except:
             self.config_initialize()
@@ -541,7 +541,7 @@ class Main(QMainWindow):
         self.config_initialize()
         
         # Read in config settings from config.json
-        with open(Path(self.main_dir, 'config.json', encoding="utf-8"), 'r') as f:
+        with open(Path(self.main_dir, 'config.json'), 'r', encoding="utf-8") as f:
             self.config = json.load(f)
             
         # Define key variables
@@ -850,7 +850,7 @@ if __name__ == '__main__':
 
     ### THEMES ###
     ## Default
-    #app.setStyle("Fusion")
+    app.setStyle("Fusion")
 
     ## From qt-material
     # Dark themes: 0-8
@@ -860,7 +860,7 @@ if __name__ == '__main__':
     #apply_stylesheet(app, theme=list_themes()[9], invert_secondary=True)
 
     ## From pyqtdarktheme
-    qdarktheme.setup_theme()
+    #qdarktheme.setup_theme()
     w = Main()
     w.show()
     app.exec()
